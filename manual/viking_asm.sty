@@ -1,0 +1,24 @@
+\ProvidesPackage{viking_asm}
+
+\RequirePackage{listings}
+
+\lstdefinelanguage[viking]{Assembler}{%
+  % so listings can detect directives and register names
+  alsoletter={.\$},
+  % strings, characters, and comments
+  morestring=[b]",
+  morestring=[b]',
+  morecomment=[l]\;,
+  % instructions
+  morekeywords={[1]add, sub, and, or, xor, slt, sltu, ldr, ldc, %
+  lsr, asr, ldb, stb, ldw, stw, bez, bnz, hcf, ldc0, ldc1, %
+  nop, not, neg, lsl, ldi, seq, sne, sge, sgeu, beq, bne, blt, %
+  bge, bltu, bgeu, lsrm, asrm, lslm, sgt, sle, sgtu, sleu, bgt, %
+  ble, bgtu, bleu, mul, div, rem, mov, ldbu, jmp, jal, jmpr, %
+  jalr, ret},
+  % assembler directives
+  morekeywords={[2].align,.ascii,.asciiz,.byte,.data,.double,.extern,%
+    .float,.globl,.half,.kdata,.ktext,.set,.space,.text,.word},
+  % register names
+  morekeywords={[3]r0, r1, r2, r3, r4, r5, r6, r7, at, sr, lr, sp},
+}[strings,comments,keywords]

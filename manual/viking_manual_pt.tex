@@ -1,0 +1,1060 @@
+\documentclass{extreport}
+\usepackage[a4paper, top=3cm, bottom=3cm]{geometry}
+%\usepackage[latin1]{inputenc}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{fixltx2e}
+\usepackage[inline]{enumitem}
+\usepackage[brazilian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{viking_asm}
+\usepackage{color}
+\usepackage{xcolor}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=t,                    % sets the caption-position to top
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=none,	                   % adds a frame around the code (none, single)
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  keywordstyle=[2]\color{black},
+  keywordstyle=[3]\color{olive},
+  language=[viking]Assembler,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=8pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\begin{document}
+
+\pagestyle{empty}
+\title{\textbf{Viking CPU - Manual de referência v0.2}}
+\author{Sérgio Johann Filho}
+
+\maketitle
+
+%\thispagestyle{empty}
+%\thanks{Essa mensagem de agredecimento foi intencionalmente deixada em branco.}
+%\newpage
+
+\renewcommand{\cftchapdotsep}{\cftdotsep}
+\tableofcontents
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead[]{\thepage}
+\rhead[\thepage]{}
+\pagenumbering{arabic}
+\onehalfspacing
+
+%\chapter*{Preface}
+%Write the preface here.
+
+\newpage
+\thispagestyle{empty}
+
+\chapter{A arquitetura Viking}
+Viking é uma arquitetura simples, construída de acordo com a filosofia RISC. Essa arquitetura foi planejada com o objetivo de servir como ponto de partida para um conjunto de instruções básico extensível, em que uma quantidade reduzida de \textit{hardware} é necessário para implementar seu conjunto de operações\footnote{O conjunto de instruções foi definido com o intuito de minimizar a complexidade da arquitetura e de forma que possa facilmente sintetizar operações mais complexas através de poucas operações básicas.}, e ainda possuir funcionalidade suficiente para a execução de \textit{software} de alto nível. Por exemplo, o banco de registradores possui poucas entradas, poucos multiplexadores são necessários, não existem qualificadores de estado de operações, unidades multiplicação e divisão não foram definidas, tampouco uma unidade de deslocamento (\textit{barrel shifter}). Esse processador pode ser implementado em variantes de 16 e 32 bits, sendo que a diferença entre as duas se dá apenas com relação ao tamanho dos registradores do seu banco, o que não altera o conjunto de instruções básico.
+
+Um pequeno número de operações é definido no conjunto de instruções da arquitetura Viking (17 operações básicas). Apesar do pequeno número de instruções, estas são poderosas o suficiente para realizarem todas as operações de máquinas com um maior número de instruções. Para que isso seja possível, muitas vezes uma instrução é utilizada de modo pouco ortodoxo ou uma combinação de instruções implementam um único comportamento. As operações são separadas em quatro classes distintas:
+
+\begin{enumerate}
+\item \textit{Computação} (AND, OR, XOR, SLT, SLTU, ADD, SUB, LDR, LDC)
+\item \textit{Deslocamento} (LSR, ASR)
+\item \textit{Carga e armazenamento} (LDB, STB, LDW, STW)
+\item \textit{Desvios condicionais} (BEZ, BNZ)
+\end{enumerate}
+
+Seguindo a filosofia RISC, as instruções são definidas em uma codificação que utiliza apenas dois formatos de instrução, com um tamanho fixo de 16 bits por instrução. Assim, a lógica necessária para a decodificação de instruções é reduzida significativamente, comparado ao que seria necessário para decodificar instruções com um tamanho variável. Além disso, um tamanho de 16 bits permite uma boa densidade de código, quando comparado a outros ISAs que possuem instruções de tamanho fixo porém com 32 bits.
+
+\section{Registradores}
+Assim como outros processadores RISC, o processador Viking é definido como uma arquitetura baseada em operações de carga e armazenamento (\textit{load/store}) para acesso à memória de dados. Para que operações lógicas e aritméticas possam ser executadas, é necessário que os operandos sejam trazidos da memória ou carregados como constantes em um ou mais registradores de propósito geral (GPRs).
+
+São definidos 8 registradores (\textit{r0 - r7}) e estes podem ser utilizados para qualquer finalidade, sendo apenas recomendado seu uso em função das convenções apresentadas na Seção \ref{ref:fcalls_conv}. Além dos 8 registradores de propósito geral (GPRs), é definido um registrador chamado contador de programa (PC). Esse registrador aponta para a instrução corrente do programa, e não pode ser modificado diretamente pelo programador. A cada instrução que é decodificada, o PC avança para a próxima posição. Desvios condicionais podem fazer com que o PC seja atualizado com o destino do desvio, caso tomado. As instruções possuem um tamanho de 16 bits, portanto o contador de programa é incrementado com esse tamanho.
+
+\section{Formatos de instrução}
+Existem apenas dois formatos de instrução definidos na arquitetura Viking (tipos R e I). Em instruções do tipo R, um registrador é definido como destino (\textit{Rst}) e dois registradores são definidos como fontes (\textit{RsA} e \textit{RsB}). Em instruções do tipo I, um registrador é definido como fonte e destino da operação (\textit{Rst}), e o segundo valor usado como fonte é obtido a partir do campo \textit{Immediate} codificado diretamente na instrução. Os índices utilizados para indexar o banco de registradores são codificados na instrução em 3 bits cada, o suficiente para referenciar 8 registradores por operando ou destino para escrita do resultado.
+
+\subsection{Instruções tipo R}
+Em instruções do tipo R os campos \textit{Opcode} (4 bits) e \textit{Op2} (2 bits) definem a operação específica. Nesse tipo de instrução três registradores são referenciados, e o papel desses registradores depende da classe à qual a instrução está associada. As instruções do tipo R possuem o campo \textit{Imm} com o valor fixo em 0.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{x x x x} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{x x} \\ \hline
+\end{tabular}
+\end{table}
+
+A função dos campos adicionais em instruções do tipo R é definida como:
+
+\begin{itemize}
+\item \textit{Rst} - registrador destino (alvo) da operação;
+\item \textit{RsA} - registrador Fonte 1 (Operando A);
+\item \textit{RsB} - registrador Fonte 2 (Operando B ou base);
+\subitem - Operando B em operações da classe computação
+\subitem - Endereço base para instruções de carga e armazenamento e desvios;
+\end{itemize}
+
+Para instruções de deslocamento, o registrador Fonte 2 deve ser sempre \textit{r0}. O motivo para isso é que não é necessário codificar a quantidade a ser deslocada, uma vez que a arquitetura pode deslocar apenas 1 bit por instrução. Em instruções de carga, o registrador Fonte 1 deve ser sempre \textit{r0} e em instruções de armazenamento e desvios condicionais, o registrador alvo é sempre \textit{r0}.  Abaixo são apresentados alguns exemplos de instruções do tipo R, utilizando a sintaxe da linguagem de montagem apresentada no Capítulo \ref{ref:assembler}. Importante observar que em instruções de armazenamento e desvios condicionais \textit{Rst} deve ser \textit{r0}, em instruções de carga \textit{RsA} deve ser \textit{r0} e em deslocamentos \textit{RsB} deve ser \textit{r0}\footnote{O motivo para tais convenções é fixar no formato de instruções o papel dos registradores \textit{Rst}, \textit{RsA} e \textit{RsB}, evitando a utilização de multiplexadores adicionais. No tipo R, o primeiro registrador sempre é escrito, e os dois últimos sempre lidos. No tipo I, o primeiro é sempre lido e escrito.}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{3.0cm}|p{6.0cm}|}
+\hline
+\bf{Operação} & \bf{Significado} \\ \hline \hline
+\texttt{add r3,r1,r2} & r3 = r1 + r2 \\ \hline
+\texttt{ldb r3,r0,r2} & r3 = MEM[r2] \\ \hline
+\texttt{stw r0,r1,r2} & MEM[r2] = r1 \\ \hline
+\texttt{and r2,r3,r4} & r2 = r3 and r4 \\ \hline
+\texttt{bez r0,r2,r3} & if (r2 == zero) PC = r3 \\ \hline
+\texttt{slt r3,r1,r2} & if (r1 < r2) r3 = 1, else r3 = 0 \\ \hline
+\texttt{lsr r5,r3,r0} & r5 = r3 $>>$ 1 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Instruções tipo I}
+Em instruções do tipo I o campo \textit{Opcode} (4 bits) define a operação específica. Nesse tipo de instrução um registrador é referenciado, e o papel desse registrador depende da classe à qual a instrução está associada. As instruções do tipo I possuem o campo \textit{Imm} com o valor fixo em 1.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{x x x x} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+
+A função dos campos adicionais em instruções do tipo I é definida como:
+
+\begin{itemize}
+\item \textit{Rst} - registrador Fonte 1 e destino;
+\item \textit{Immediate} - campo com valor imediato;
+\subitem - Fonte 2 em instruções da classe computação;
+\subitem - Endereço relativo ao contador de programa em desvios;
+\end{itemize}
+
+Para desvios condicionais, endereço efetivo é calculado somando-se o valor atual do contador de programa (PC) ao campo \textit{Immediate} (extendido em sinal\footnote{A implementação de extensão de sinal é apresentada na Seção \ref{ref:sign_ext}.} e representado em complemento de 2). Dessa forma, é possível realizar desvios relativos ao PC de $\pm$128 bytes\footnote{No futuro o campo \textit{Immediate} poderá codificar apenas a magnitude alinhada, o que aumenta o alcance dos desvios relativos para $\pm$256 bytes.}, o suficiente para lidar com a maior parte dos casos que envolvem saltos de tamanho reduzido, como em comandos de seleção e laços curtos. Abaixo são apresentados alguns exemplos de instruções do tipo I, utilizando a sintaxe da linguagem de montagem.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{3.0cm}|p{6.0cm}|}
+\hline
+\bf{Operação} & \bf{Significado} \\ \hline \hline
+\texttt{add r5,10} & r5 = r5 + 10 \\ \hline
+\texttt{or r2,1} & r2 = r2 or 1 \\ \hline
+\texttt{xor r5,-1} & r5 = r5 xor -1 = not r5 \\ \hline
+\texttt{ldr r3,5} & r3 = 5 \\ \hline
+\texttt{ldc r3,10} & r3 = (r3 $<<$ 8) or 10 \\ \hline
+\texttt{slt r4,10} & if (r4 < 10) r4 = 1, else r4 = 0 \\ \hline
+\texttt{bez r4,28} & if (r4 == zero) PC = PC + 28 \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Modos de endereçamento}
+
+Apenas três modos de endereçamento são utilizados na arquitetura, sendo esses:
+
+\begin{enumerate}
+\item \textit{Registrador}
+\item \textit{Imediato}
+\item \textit{Relativo ao PC}
+\end{enumerate}
+
+O primeiro modo (registrador) é utilizado por instruções do tipo R apenas. Instruções que fazem uso desse modo pertencem às classes computação, deslocamento, carga e armazenamento e desvios condicionais. O segundo modo (imediato) é utilizado por instruções do tipo I apenas, classe computação. O último modo (relativo ao PC) é utilizado por instruções do tipo I, classe desvios condicionais.
+ 
+Dois modos de endereçamento bastante comuns são os modos \textit{direto} e \textit{indireto}. A arquitetura Viking não define esses modos de endereçamento, uma vez que a memória de dados é acessada exclusivamente por operações de carga e armazenamento. No entanto, tais modos podem ser emulados\footnote{No Capítulo \ref{ref:pseudo_ops} são apresentadas pseudo operações que emulam o modo de endereçamento direto.} com o uso de múltiplas instruções de carga, permitindo acesso à memória pelo número indireções desejado. Outros modos de endereçamento como \textit{base + deslocamento}, \textit{base + índice}, \textit{indireto à registrador}, \textit{indireto à memória} e \textit{auto incremento}, entre outros, não foram definidos com o objetivo de simplificar a arquitetura.
+
+\section{Conjunto de instruções}
+
+O conjunto de instruções básico definido na arquitetura é apresentado a seguir. Diversos códigos de operação são reservados para extensões futuras, como operações aritméticas, carga e armazenamento e desvios, além de instruções mais poderosas com tamanho de 32 bits.
+
+As operações definidas no conjunto de instruções básico permitem que operações não elementares possam ser geradas a partir de sequências curtas. Como as instruções possuem tamanho de 16 bits, a densidade do código é boa.
+
+\subsection{Computação}
+
+\subsubsection{AND - bitwise logical product}
+Realiza o produto lógico de dois valores e armazena o resultado em um registrador.
+
+\begin{itemize}
+\item AND Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] and GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 0 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item AND Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[Rst] and ZEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 0 0 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{OR - bitwise logical sum}
+Realiza a soma lógica de dois valores e armazena o resultado em um registrador.
+
+\begin{itemize}
+\item OR Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] or GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 0 1} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item OR Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[Rst] or ZEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 0 0 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{XOR - bitwise logical difference}
+Realiza a diferença lógica de dois valores e armazena o resultado em um registrador. No tipo I, o segundo valor possui extensão de sinal.
+
+\begin{itemize}
+\item XOR Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] xor GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 1 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item XOR Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[Rst] xor SEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 0 1 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{SLT - set if less than}
+Compara dois valores (com sinal, em complemento de 2). Se o primeiro for menor que o segundo, armazena 1 (verdadeiro) em um registrador. Senão, armazena 0 (falso). No tipo I, o segundo valor possui extensão de sinal. O cálculo do valor dessa instrução é definido por \texttt{SLT = N xor V}, resultante de uma subtra\c{c}\~{a}o realizada internamente e avaliação da diferença lógica dos qualificadores \textit{negative} e \textit{overflow}, também internos a ULA. O valor da condição \texttt{SLT} é armazenado no bit menos significativo do registrador destino, sendo os outros zerados.
+
+\begin{itemize}
+\item SLT Rst, RsA, RsB
+\subitem \texttt{if (GPR[RsA] < GPR[RsB]) GPR[Rst] $\leftarrow$ 1}
+\subitem \texttt{else GPR[Rst] $\leftarrow$ 0}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 1 1} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item SLT Rst, Immediate
+\subitem \texttt{if (GPR[RsA] < SEXT(Immediate) GPR[Rst] $\leftarrow$ 1}
+\subitem \texttt{else GPR[Rst] $\leftarrow$ 0}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 0 1 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{SLTU - set if less than (unsigned)}
+Compara dois valores (sem sinal). Se o primeiro for menor que o segundo, armazena 1 (verdadeiro) em um registrador. Senão, armazena 0 (falso). No tipo I, o segundo valor possui extensão de sinal. O cálculo dessa instrução é definido por \texttt{SLTU = C}, resultante de uma subtra\c{c}\~{a}o realizada internamente e avaliação do qualificador \textit{carry} interno a ULA. O valor da condição \texttt{SLTU} é armazenado no bit menos significativo do registrador destino, sendo os outros zerados.
+
+\begin{itemize}
+\item SLTU Rst, RsA, RsB
+\subitem \texttt{if (GPR[RsA] < GPR[RsB]) GPR[Rst] $\leftarrow$ 1}
+\subitem \texttt{else GPR[Rst] $\leftarrow$ 0}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 0 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item SLTU Rst, Immediate
+\subitem \texttt{if (GPR[RsA] < SEXT(Immediate) GPR[Rst] $\leftarrow$ 1}
+\subitem \texttt{else GPR[Rst] $\leftarrow$ 0}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 1 0 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{ADD - add}
+Soma dois valores e armazena o resultado em um registrador. No tipo I, o segundo valor possui extensão de sinal.
+
+\begin{itemize}
+\item ADD Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] + GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 0 1} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item ADD Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[Rst] + SEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 1 0 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{SUB - subtract}
+Subtrai dois valores e armazena o resultado em um registrador. No tipo I, o segundo valor possui extensão de sinal.
+
+\begin{itemize}
+\item SUB Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] - GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 1 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0} \\ \hline
+\end{tabular}
+\end{table}
+
+\item SUB Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[Rst] - SEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{0 1 1 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{LDR - load register}
+Carrega uma constante de 8 bits em um registrador. O valor carregado possui extensão de sinal, o que facilita a carga de constantes de pequeno valor ($\pm$128, em complemento de dois) com apenas uma instrução.
+
+\begin{itemize}
+\item LDR Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ SEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{1 0 0 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{LDC - load constant}
+Carrega uma constante em um registrador. O valor carregado não possui extensão de sinal. Antes de carregar o valor nos 8 bits menos significativos de um registrador, o mesmo tem seu conteúdo deslocado à esquerda, o que permite a carga de constantes de valores maiores que $\pm$128 com múltiplas instruções.
+
+\begin{itemize}
+\item LDC Rst, Immediate
+\subitem \texttt{GPR[Rst] $\leftarrow$ (GPR[Rst] $<<$ 8) + ZEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{1 0 0 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsection{Deslocamento}
+\subsubsection{LSR - logical shift right}
+Realiza a o deslocamento lógico por 1 bit à direita e armazena o resultado em um registrador.
+
+\begin{itemize}
+\item LSR Rst, RsA, r0
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] $>>$ 1}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 0 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{0 1} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{ASR - arithmetic shift right}
+Realiza a o deslocamento aritmético por 1 bit à direita e armazena o resultado em um registrador. O valor armazenado tem seu sinal mantido.
+
+\begin{itemize}
+\item ASR Rst, RsA, r0
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] $>>$ 1}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 0 1} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{0 1} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsection{Carga e armazenamento}
+\subsubsection{LDB - load byte}
+Carrega um byte da memória. O endereço é obtido a partir do registrador base \textit{RsB}. O valor é carregado na parte baixa do registrador destino \textit{Rst}, e possui extensão de sinal.
+
+\begin{itemize}
+\item LDB Rst, r0, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ SEXT(MEM[GPR[RsB]]\textsubscript{<7:0>})}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 0 0} & \texttt{0} & \texttt{r r r} & \texttt{0 0 0} & \texttt{r r r} & \texttt{1 0} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{STB - store byte}
+Armazena um byte na memória. O endereço é obtido a partir do registrador base \textit{RsB}. O valor armazenado encontra-se na parte baixa do registrador fonte \textit{RsA}.
+
+\begin{itemize}
+\item STB r0, RsA, RsB
+\subitem \texttt{MEM[GPR[RsB]] $\leftarrow$ GPR[RsA]\textsubscript{<7:0>}}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 0 0 1} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 0} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{LDW - load word}
+Carrega uma palavra da memória. O endereço é obtido a partir do registrador base \textit{RsB} e deve estar alinhado ao tamanho da palavra (16 ou 32 bits). O valor é carregado no registrador destino \textit{Rst}.
+
+\begin{itemize}
+\item LDW Rst, r0, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ MEM[GPR[RsB]]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 0 0} & \texttt{0} & \texttt{r r r} & \texttt{0 0 0} & \texttt{r r r} & \texttt{1 0} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{STW - store word}
+Armazena uma palavra na memória. O endereço é obtido a partir do registrador base \textit{RsB} e deve estar alinhado ao tamanho da palavra (16 ou 32 bits). O valor armazenado encontra-se no registrador fonte \textit{RsA}.
+
+\begin{itemize}
+\item STW r0, RsA, RsB
+\subitem \texttt{MEM[GPR[RsB]] $\leftarrow$ GPR[RsA]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 0 1} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 0} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsection{Desvios condicionais}
+\subsubsection{BEZ - branch if equal zero}
+Realiza um desvio condicional, caso o valor de Fonte 1 seja zero. O endereço é obtido a partir do registrador base \textit{RsB} ou relativo ao PC e deve estar alinhado ao tamanho de uma instrução (16 bits).
+
+\begin{itemize}
+\item BEZ r0, RsA, RsB
+\subitem \texttt{if (GPR[RsA] == zero) PC $\leftarrow$ GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{1 0 1 0} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 1} \\ \hline
+\end{tabular}
+\end{table}
+
+\item BEZ Rst, Immediate
+\subitem \texttt{if (GPR[Rst] == zero) PC $\leftarrow$ PC + SEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{1 0 1 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{BNZ - branch if not equal zero}
+Realiza um desvio condicional, caso o valor de Fonte 1 não seja zero. O endereço é obtido a partir do registrador base \textit{RsB} ou relativo ao PC e deve estar alinhado ao tamanho de uma instrução (16 bits).
+
+\begin{itemize}
+\item BNZ r0, RsA, RsB
+\subitem \texttt{if (GPR[RsA] != zero) PC $\leftarrow$ GPR[RsB]}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{1 0 1 1} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 1} \\ \hline
+\end{tabular}
+\end{table}
+
+\item BNZ Rst, Immediate
+\subitem \texttt{if (GPR[Rst] != zero) PC $\leftarrow$ PC + SEXT(Immediate)}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
+\texttt{1 0 1 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+A tabela a seguir apresenta um resumo das operações definidas na arquitetura. Importante observar que diversos \textit{opcodes} não foram definidos, o que permite adição de novas instruções ao conjunto básico.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{5.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+\bf{Instrução} 				& \bf{Descrição} & \bf{Opcode} & \bf{Imm} & \bf{Op2} \\ \hline \hline
+AND & Logical product 			& \texttt{0 0 0 0} & \texttt{x} & \texttt{0 0} \\ \hline
+OR & Logical sum 			& \texttt{0 0 0 1} & \texttt{x} & \texttt{0 0} \\ \hline
+XOR & Logical difference 		& \texttt{0 0 1 0} & \texttt{x} & \texttt{0 0} \\ \hline
+SLT & Set if less than 			& \texttt{0 0 1 1} & \texttt{x} & \texttt{0 0} \\ \hline
+SLTU & Set if less than (unsigned) 	& \texttt{0 1 0 0} & \texttt{x} & \texttt{0 0} \\ \hline
+ADD & Add 				& \texttt{0 1 0 1} & \texttt{x} & \texttt{0 0} \\ \hline
+SUB & Subtract 				& \texttt{0 1 1 0} & \texttt{x} & \texttt{0 0} \\ \hline
+LDR & Load register 			& \texttt{1 0 0 0} & \texttt{1} & \texttt{0 0} \\ \hline
+LDC & Load constant 			& \texttt{1 0 0 1} & \texttt{1} & \texttt{0 0} \\ \hline
+LSR & Logical shift right 		& \texttt{0 0 0 0} & \texttt{0} & \texttt{0 1} \\ \hline
+ASR & Arithmetic shift right 		& \texttt{0 0 0 1} & \texttt{0} & \texttt{0 1} \\ \hline
+LDB & Load byte 			& \texttt{0 0 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
+STB & Store byte 			& \texttt{0 0 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
+LDW & Load word 			& \texttt{0 1 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
+STW & Store word 			& \texttt{0 1 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
+BEZ & Branch if equal zero 		& \texttt{1 0 1 0} & \texttt{x} & \texttt{1 1} \\ \hline
+BNZ & Branch if not equal zero 		& \texttt{1 0 1 1} & \texttt{x} & \texttt{1 1} \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Características únicas}
+\subsection{Carga de constantes}
+\label{ref:constants}
+A carga de constantes pode ser realizada com as instruções LDR e LDC. A instrução LDR simplifica a carga de constantes com valor entre $\pm$128 e outras com valor negativo e maior magnitude. O objetivo de existir uma instrução específica para carga de valores pequenos é o fato da maior parte das constantes terem um valor nessa faixa, além de inicializar com a extensão de sinal a parte alta de um registrador. O valor -1 pode ser carregado diretamente com:
+
+\begin{verbatim}
+        ldr r1,-1
+\end{verbatim}
+
+Para constantes com valores fora da faixa de valores entre $\pm$128 uma sequência de instruções LDC (ou LDR + LDC) pode ser usada. Uma constante em uma arquitetura de 16 bits pode ser carregada pela seguinte sequência. O valor a ser carregado é $1234_{16}$ e os bytes são carregados a partir do byte mais significativo\footnote{Mais detalhes sobre a ordem de bytes da arquitetura são apresentados na Seção \ref{ref:data_types}.}, sendo os valores especificados em decimal.
+
+\begin{verbatim}
+        ldc r1,18
+        ldc r1,52
+\end{verbatim}
+
+Para a carga da mesma constante em uma arquitetura de 32 bits, a sequência a seguir pode ser utilizada.
+
+\begin{verbatim}
+        ldc r1,0
+        ldc r1,0
+        ldc r1,18
+        ldc r1,52
+\end{verbatim}
+
+É importante observar que com a carga de todo o registrador qualquer informação antiga terá sido eliminada, uma vez que o registrador tem seu conteúdo deslocado à esquerda 8 bits a cada instrução. Uma maneira mais eficiente seria (desde que o valor do primeiro byte seja menor que 128):
+
+\begin{verbatim}
+        ldr r1,18
+        ldc r1,52
+\end{verbatim}
+
+O valor -31073 pode ser carregado com o par de instruções a seguir (assumindo que a instrução LDR utiliza uma constante sinalizada e LDC não):
+
+\begin{verbatim}
+        ldr r1,-122
+        ldc r1,159
+\end{verbatim}
+
+Outro exemplo seria a carga de constantes com valores de grande magnitude (32 bits). No exemplo, o valor a ser carregado é $12345678_{16}$ (ou $305419896_{10}$).
+
+\begin{verbatim}
+        ldc r1,0x12
+        ldc r1,0x34
+        ldc r1,0x56
+        ldc r1,0x78
+\end{verbatim}
+
+Para o caso de uma arquitetura de 32 bits, de uma a quatro instruções podem ser utilizadas, sendo que o número de instruções varia de acordo com a magnitude do valor da constante. Para uma versão de 16 bits, duas instruções LDC podem ser utilizadas para a carga de constantes fora da faixa de valor $\pm$128.
+
+\subsection{Extensão de sinal}
+\label{ref:sign_ext}
+Para que valores imediados (instruções do tipo I) possam ser utilizados para aritmética, é necessário que a sinalização adequada seja mantida (em complemento de dois). Para implementar a extensão de sinal, o valor do oitavo bit do campo imediato (bit 7) é replicado para todos os bits mais significativos de Fonte 2. O comportamento da extensão de sinal pode ser descrito como \texttt{SEXT(Immediate) $\leftarrow$ Immediate\textsubscript{<7>} ... Immediate\textsubscript{<7:0>}}. As únicas operações do tipo I que não utilizam extensão de sinal, ou seja utilizam extensão por zero, são as instruções AND, OR e LDC.
+
+\subsection{Desvios condicionais}
+São definidas duas instruções de desvios condicionais (BEZ e BNZ) na arquitetura, que comparam o valor de um registrador com zero e realizam desvios condicionalmente. O motivo para a definição dessas instruções, e não instruções mais genéricas que comparam o valor de um registrador com qualquer valor (como BEQ e BNE) é simples. No tipo de instrução R, três registradores são referenciados. Se dois valores a serem comparados estivessem em registrador, e mais um registrador de endereços fosse referenciado na mesma instrução, seriam necessárias três portas de leitura no banco de registradores. Além disso, seria necessário o uso de um multiplexador adicional para modificar a semântica dos campos \textit{Rst}, \textit{RsA} e \textit{RsB} em instruções de desvio.
+
+\subsection{Outras operações}
+Algumas operações elementares como complemento, deslocamentos à esquerda e outros tipos de desvios são implementados na arquitetura com o uso de pseudo operações. Em algumas operações, não existe vantagem alguma em incluir \textit{hardware} adicional para o seu suporte, uma vez que as mesmas podem ser sintetizadas diretamente por outras equivalentes. Um exemplo é o deslocamento à esquerda, que pode ser obtido somando-se um valor a ele mesmo, não sendo necessária uma instrução separada para implementar esse comportamento.
+
+Outras operações podem ser sintetizadas com sequências de poucas instruções elementares. Mais detalhes sobre tais operações são apresentadas no Capítulo \ref{ref:pseudo_ops}.
+
+\section{Tipos de dados}
+\label{ref:data_types}
+Viking é uma arquitetura \textit{big-endian}, ou seja, tipos compostos por múltiplos bytes possuem o endereço alinhado com o byte mais significativo. Dessa forma, o primeiro byte de uma instrução (mais significativo) é capaz de conter informação suficiente para definir operações que resultem em instruções com tamanho maior que 16 bits, uma possível extensão do formato de instruções. Na arquitetura Viking existem dois tipos de dados:
+
+\begin{itemize}
+\item Um \textit{byte} possui 8 bits. Em operações de carga e armazenamento o byte mais significativo de uma palavra (dados, bits <31:24> para 32 bits ou bits <15:8> para 16 bits) é acessado quando o endereço estiver alinhado (endereço, bits <1:0> = 0 para 32 bits ou bit <0> = 0 para 16 bits) e o byte menos significativo é acessado quando os bits do endereço forem <1:0> = 3 (para palavras de 32 bits) e <0> = 1 (para palavras de 16 bits).
+\item Uma \textit{palavra} possui 32 ou 16 bits (dependendo da implementação). Esse tipo possui seu byte mais significativo acessado na parte alta da palavra em operações de carga e armazenamento quando o endereço estiver alinhado (bits <1:0> = 0 para 32 bits ou bit <0> = 0 para 16 bits). Não são definidos acessos desalinhados para esse tipo.
+\end{itemize}
+
+\section{Convenções de chamada de função}
+\label{ref:fcalls_conv}
+
+\subsection{Pilha}
+\label{ref:stack}
+Não há mecanismos ou instruções específicas para o gerenciamento da pilha. O programador é responsável por fazer a gerência manualmente, utilizando o registrador \textit{r7} (\textit{sp}) para essa finalidade. Por convenção, a pilha cresce do endereço mais alto para o endereço mais baixo, e esta deve ser inicializada com o endereço do topo da pilha no início do programa. Para implementar o comportamento de instruções estilo \textit{PUSH} e \textit{POP}, pode ser usado o seguinte padrão de código:
+
+\begin{verbatim}
+    add sp,-2         # PUSH r1
+    stw r0,r1,sp
+    ...
+    ldw r1,r0,sp      # POP r1
+    add sp,2
+\end{verbatim}
+
+Importante observar que no código foi considerada uma implementação de 16 bits da arquitetura. Caso fossem utilizados registradores de 32 bits, seria necessário alocar / desalocar 4 bytes na pilha, e não 2 como apresentado no exemplo.
+
+\subsection{Registradores}
+\label{ref:regs}
+Um conjunto de 8 registradores de propósito geral é definido na arquitetura. Por questões de interoperabilidade, as seguintes convenções são definidas para o uso de tais registradores. Importante observar que os nomes alternativos podem ser utilizados para designar os papéis de registradores específicos e tornar o código de montagem mais legível.
+ 
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.5cm}|p{1.6cm}|p{1.6cm}|p{4.3cm}|p{2.5cm}|}
+\hline
+\bf{Registrador} & \bf{Nome} & \bf{Apelido} & \bf{Papel} & \bf{Preservado} \\ \hline \hline
+\texttt{0}	& \texttt{r0}	& \texttt{at}	& Temporário (montador) & Não \\ \hline
+\texttt{1}	& \texttt{r1}	& \texttt{r1}	& Variável local & Chamado \\ \hline
+\texttt{2}	& \texttt{r2}	& \texttt{r2}	& Variável local & Chamado \\ \hline
+\texttt{3}	& \texttt{r3}	& \texttt{r3}	& Variável local & Chamado \\ \hline
+\texttt{4}	& \texttt{r4}	& \texttt{r4}	& Variável local & Chamado \\ \hline
+\texttt{5}	& \texttt{r5}	& \texttt{sr}	& Temporário & Não \\ \hline
+\texttt{6}	& \texttt{r6}	& \texttt{lr}	& Endereço de retorno & Chamador \\ \hline
+\texttt{7}	& \texttt{r7}	& \texttt{sp}	& Apontador de pilha & Sim \\ \hline
+\end{tabular}
+\end{table}
+
+Nos formatos de instruções em que um dos registradores especificado é fixo, deve-se utilizar a notação \textit{r0}. Nos outros casos, o registrador 0 deve ser referenciado por \textit{at}. O registrador \textit{at} é reservado para a síntese de pseudo operações, e deve ser utilizado diretamente pelo programador apenas em situações em que não estão envolvidas pseudo operações. Os registradores \textit{r1} a \textit{r4} são de propósito geral e podem ser utilizados para avaliação de expressões e passagem de parâmetros. O registrador \textit{sr} é um registrador temporário, e pode ser utilizado para qualquer finalidade. Para chamada de procedimentos e manipulação da pilha são utilizados os registradores \textit{lr} e \textit{sp} respectivamente.
+
+Caso necessário, os registradores \textit{sr} e \textit{lr} podem ser utilizados como registradores de propósito geral. Para que o registrador \textit{lr} possa ser utilizado com esse fim, seu conteúdo deve ser colocado na pilha no início da função, e restaurado no final antes de efetuado o retorno de função. Quando tratados como registradores de propósito geral, \textit{sr} e \textit{lr} devem ser referenciados por seus nomes \textit{r5} e \textit{r6}, ficando assim os registradores \textit{r1} a \textit{r6} (6 registradores) disponíveis para uso geral.
+
+\subsection{Chamada e retorno de funções}
+\label{ref:fcalls}
+Em função do número reduzido de registradores na arquitetura, a passagem de parâmetros ocorre normalmente pela pilha. Apenas em casos onde não é desejável a manipulação da pilha (pequenas funções, por exemplo) os registradores \textit{r1} a \textit{r4} podem ser utilizados para essa finalidade. Nesse caso, é responsabilidade tanto da função chamadora quanto da função chamada definirem o protocolo adequado.
+
+Não existem instruções nativas para o suporte de chamada e retorno de funções. Assim, para realizar a passagem de parâmetros pela pilha são necessárias as seguintes convenções:
+
+\begin{itemize}
+\item Usar o registrador \textit{r5} (\textit{scratch register, sr}) para o retorno de valores em funções. Se mais valores de retorno forem necessários, deve-se utilizar a pilha;
+\item Usar o registrador \textit{r6} (\textit{link register, lr}) como um registrador de endereço de retorno, e gerenciar o mesmo usando a pilha no caso de chamadas recursivas;
+\item Usar o registrador \textit{r7} (\textit{stack pointer, sp}) como apontador de pilha e fazer a sua gerência manualmente.
+\end{itemize}
+
+Uma chamada de função envolve gerenciar a passagem e retorno de parâmetros e endereços de chamada e retorno de função. Considerando as limitações da arquitetura, o seguinte protocolo pode ser usado:
+
+\begin{enumerate}
+\item Colocar os parâmetros na pilha (em ordem inversa);
+\item Salvar \textit{lr} na pilha;
+\item Carregar \textit{lr} com o endereço de retorno (um rótulo definido após a instrução de desvio que salta para a função chamada);
+\item Carregar \textit{sr} com o endereço da função a ser chamada;
+\item Saltar para \textit{sr} (chamada de função). Na função:
+	\begin{enumerate}
+	\item Salvar \textit{r1} até \textit{r4} na pilha, se necessário;
+	\item (Fazer o que for necessário);
+	\item Escrever o resultado pelos parâmetros (ponteiros) ou em \textit{sr};
+	\item Restaurar registradores \textit{r1} até \textit{r4}, se necessário;
+	\item Saltar para \textit{lr} (retorno);
+	\end{enumerate}
+\item Na função chamadora, restaurar \textit{lr} da pilha;
+\item Liberar da pilha os parâmetros.
+\end{enumerate}
+
+\chapter{Síntese de pseudo instruções}
+\label{ref:pseudo_ops}
+
+Neste Capítulo são apresentadas diversas instruções que não fazem parte da arquitetura Viking, mas que podem ser sintetizadas de maneira simples. As operações apresentadas correspondem a instruções tipicamente encontradas em arquiteturas RISC, e servem para facilitar o desenvolvimento de programas em linguagem de montagem ou para a simplificação das listagens resultantes do processo de compilação.
+
+Nas tabelas de instruções são apresentados o formato da instrução (pseudo operação) e a sua equivalência em uma sequência de instruções suportadas pela arquitetura. Em instruções que necessitam de um registrador temporário, \textit{at} é utilizado para esse fim. O registrador \textit{lr} é utilizado como endereço de retorno.
+
+\section{Pseudo operações básicas}
+
+Instruções de complemento são sintetizadas com operações XOR e SUB. Deslocamentos à esquerda são sintetizados com operações ADD. A carga de constantes é sintetizada de maneira trivial pelo montador, no entanto uma sequência mais otimizada pode ser gerada, como apresentado na Seção \ref{ref:constants}. O parâmetro \textit{const} da pseudo operação LDI pode ser tanto um valor numérico quanto um rótulo, tendo seu valor resolvido pelo montador.
+
+Operações de carga e armazenamento e desvios podem ser especificadas com apenas dois registradores, uma vez que para essas instruções um dos registradores não é utilizado fazendo com que o formato com três registradores se torne pouco intuitivo. Os parâmetros \textit{addr} das operações BEZ e BNZ podem ser rótulos, sendo que essas operações fazem uso do registrador \textit{at} para a carga do endereço. Isso simplifica o código de montagem pois o programador não precisa carregar o endereço manualmente. Outras operações que fazem uso de rótulos são LDB, STB, LDW e STW. A operação HCF não é definida pela arquitetura, e possui funcionalidade apenas no contexto de simulação (a simulação é abortada).
+
+Nos formatos de pseudo operações suportadas pelo montador e pseudo operações adicionais, o registrador \textit{r1} é exemplificado como registrador destino ou fonte da operação, enquanto \textit{r2} é fonte.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 				& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+NOP  & No operation 			& \texttt{nop} & \texttt{and r0,r0,r0}  \\ \hline
+NOT  & One's complement 		& \texttt{not r1} & \texttt{xor r1,-1}  \\ \hline
+NEG  & Two's complement			& \texttt{neg r1} & \texttt{xor at,at,at\newline sub r1,at,r1} \\ \hline
+LSR  & Logical shift right		& \texttt{lsr r1,r2} & \texttt{lsr r1,r2,r0} \\ \hline
+ASR  & Arithmetic shift right		& \texttt{asr r1,r2} & \texttt{asr r1,r2,r0} \\ \hline
+LSL  & Logical shift left		& \texttt{lsl r1,r2} & \texttt{add r1,r2,r2} \\ \hline
+LDI  & Load immediate			& \texttt{ldi r1,\textit{const}} & \texttt{ldc r1,\textit{byte0}\newline ldc r1,\textit{byte1}\newline ...} \\ \hline
+BEZ  & Branch if equal zero		& \texttt{bez r1,r2} & \texttt{bez r0,r1,r2} \\ \hline
+	& 				& \texttt{bez r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline bez r0,r1,at} \\ \hline
+BNZ  & Branch if not equal zero		& \texttt{bnz r1,r2} & \texttt{bnz r0,r1,r2} \\ \hline
+	& 				& \texttt{bnz r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline bnz r0,r1,at} \\ \hline
+LDB  & Load byte			& \texttt{ldb r1,r2} & \texttt{ldb r1,r0,r2} \\ \hline
+	& 				& \texttt{ldb r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline ldb r1,r0,at} \\ \hline
+STB  & Store byte			& \texttt{stb r1,r2} & \texttt{stb r0,r1,r2} \\ \hline
+	& 				& \texttt{stb r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline stb r0,r1,at} \\ \hline
+LDW  & Load word			& \texttt{ldw r1,r2} & \texttt{ldw r1,r0,r2} \\ \hline
+	& 				& \texttt{ldw r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline ldw r1,r0,at} \\ \hline
+STW  & Store word			& \texttt{stw r1,r2} & \texttt{stw r0,r1,r2} \\ \hline
+	&				& \texttt{stw r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline stw r0,r1,at} \\ \hline
+HCF  & Halt and catch fire		& \texttt{hcf} & \texttt{0x0003} (padrão)  \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Operações de deslocamento}
+
+Nas operações de deslocamento que envolvem múltiplos bits o registrador \textit{r1} é exemplificado como fonte e destino e \textit{r2} contém o número de bits a serem deslocados. O conteúdo de \textit{r2} também é modificado como resultado do processamento.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 					& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+LSRM & Logical shift right multiple		& \texttt{lsrm r1,r2} & \texttt{lsr r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
+ASRM & Arithmetic shift right multiple		& \texttt{asrm r1,r2} & \texttt{asr r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
+LSLM & Logical shift left multiple		& \texttt{lslm r1,r2} & \texttt{add r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Pseudo operações não suportadas pelo montador}
+
+\subsection{Testes, seleção e desvios (condicionais)}
+Em pseudo operações que envolvem testes, os registradores \textit{r2} e \textit{r3} são exemplificados como operandos e \textit{r1} como alvo. As operações SLT e SLTU já fazem parte do conjunto de instruções básico, e por isso não foram apresentadas na tabela.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 					& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+SEQ  & Set if equal 				& \texttt{seq r1,r2,r3} & \texttt{sub r1,r2,r3\newline sltu r1,1} \\ \hline
+SNE  & Set if not equal				& \texttt{sne r1,r2,r3} & \texttt{sub r1,r2,r3\newline xor at,at,at\newline sltu r1,at,r1} \\ \hline
+SGE  & Set if greater equal			& \texttt{sge r1,r2,r3} & \texttt{slt r1,r2,r3\newline ldr at,1\newline sub r1,at,r1} \\ \hline
+SGEU & Set if greater equal (unsigned)		& \texttt{sgeu r1,r2,r3} & \texttt{sltu r1,r2,r3\newline ldr at,1\newline sub r1,at,r1} \\ \hline
+\end{tabular}
+\end{table}
+
+Nos formatos de desvios condicionais, os registradores \textit{r1} e \textit{r2} são exemplificados como operandos, sendo o valor de \textit{r1} não preservado. Um endereço é definido no rótulo \textit{addr}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 					& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+BEQ  & Branch if equal 				& \texttt{beq r1,r2,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline sub r1,r1,r2\newline bez r0,r1,at} \\ \hline
+BNE  & Branch if not equal			& \texttt{bne r1,r2,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline sub r1,r1,r2\newline bnz r0,r1,at} \\ \hline
+BLT  & Branch if less than			& \texttt{blt r1,r2,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline slt r1,r1,r2\newline bnz r0,r1,at} \\ \hline
+BGE  & Branch if greater equal			& \texttt{bge r1,r2,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline slt r1,r1,r2\newline bez r0,r1,at} \\ \hline
+BLTU & Branch if less than (unsigned)		& \texttt{bltu r1,r2,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline sltu r1,r1,r2\newline bnz r0,r1,at} \\ \hline
+BGEU & Branch if greater equal (unsigned)	& \texttt{bgeu r1,r2,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline sltu r1,r1,r2\newline bez r0,r1,at} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Operações condicionais equivalentes}
+
+Outras operações condicionais são equivalentes às definidas anteriormente, sendo apenas necessário inverter a ordem dos operandos. Por exemplo, a instrução BLE é a mesma que BGE porém com os operandos invertidos.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 					& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+SGT  & Set if greater equal			& \texttt{sgt r1,r2,r3} & \texttt{slt r1,r3,r2} \\ \hline
+SLE  & Set if less equal			& \texttt{sle r1,r2,r3} & \texttt{sge r1,r3,r2} \\ \hline
+SGTU & Set if greater than (unsigned)		& \texttt{sgtu r1,r2,r3} & \texttt{sltu r1,r3,r2} \\ \hline
+SLEU & Set if less equal (unsigned)		& \texttt{sleu r1,r2,r3} & \texttt{sgeu r1,r3,r2} \\ \hline
+BGT  & Branch if greater than			& \texttt{bgt r1,r2,r3} & \texttt{blt r2,r1,r3} \\ \hline
+BLE  & Branch if less equal			& \texttt{ble r1,r2,r3} & \texttt{bge r2,r1,r3} \\ \hline
+BGTU & Branch if greater than (unsigned)	& \texttt{bgtu r1,r2,r3} & \texttt{bltu r2,r1,r3} \\ \hline
+BLEU & Branch if less equal (unsigned)		& \texttt{bleu r1,r2,r3} & \texttt{bgeu r2,r1,r3} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Desvios incondicionais}
+
+Desvios incondicionais, assim como operações de chamada e retorno de subrotina podem ser trivialmente emuladas. Assume-se que \textit{r7} (\textit{sp}) seja sempre diferente de zero.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 				& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+JMP  & Jump				& \texttt{jmp \textit{addr}} & \texttt{ldi at,\textit{addr}\newline bnz r0,r7,at} \\ \hline
+JAL  & Jump and link			& \texttt{jal \textit{addr}} & \texttt{ldi at,\textit{addr}\newline ldi lr,\textit{raddr}\newline bnz r0,r7,at} \\ \hline
+JMPR & Jump register 			& \texttt{jmpr r1} & \texttt{bnz r0,r7,r1} \\ \hline
+JALR & Jump and link register		& \texttt{jalr r1} & \texttt{ldi lr,\textit{raddr}\newline bnz r0,r7,r1} \\ \hline
+RET  & Return				& \texttt{ret} & \texttt{bnz r0,r7,lr}\\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Operações aritméticas adicionais}
+
+Para operações de multiplicação, divisão e resto são necessárias chamadas para funções que emulam tais instruções. Nessas operações, os registradores \textit{r2} e \textit{r3} são exemplificados como operandos e \textit{r1} como alvo. As rotinas \textit{mulsi3} (multiplicação), \textit{divsi3} (divisão) e \textit{modsi3} (resto) são apresentadas no Apêndice \ref{ref:muldiv}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\bf{Instrução} 				& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
+MUL / DIV / REM & Multiply / Divide / Division remainder				& \texttt{mul r1,r2,r3 / div r1,r2,r3 / rem r1,r2,r3} & \texttt{sub sp,2\newline stw r0,r2,sp\newline sub sp,2\newline stw r0,r3,sp\newline sub sp,2\newline stw r0,lr,sp\newline ldi lr,\textit{raddr}\newline ldi sr,\textit{mulsi3 / divsi3 / modsi3}\newline bnz r0,r7,sr\newline ldw lr,r0,sp\newline add sp,6\newline add r1,r0,sr} \\ \hline
+\end{tabular}
+\end{table}
+
+\chapter{Montagem de código e simulação}
+\label{ref:assembler}
+
+\section{Montador}
+O montador possui uma sintaxe bastante simples, não sendo necessário definir regiões separadas para código e dados e diretivas tradicionalmente utilizadas em montadores de outras arquiteturas. O programa montador foi descrito com a linguagem Python, em função de sua facilidade natural de manipular texto e poder servir como referência para implementações mais completas e com um desempenho melhor.
+
+\subsection{Formato da linguagem de montagem}
+
+Rótulos são utilizados para declarar pontos específicos (deslocamentos) no código, como destinos de saltos, endereço de entrada de funções ou procedimentos e também endereços de estruturas de dados (variáveis e vetores). O montador é responsável por resolver o valor dos rótulos, permitindo que as referências à memória assumam um valor numérico para a codificação das instruções em linguagem de máquina.
+
+Instruções são representadas por seus mnemônicos, e em sua maioria possuem parâmetros que especificam o modo de endereçamento utilizado (R ou I) e operandos. Os mnemônicos que representam instruções, assim como as referências à registradores, são traduzidos pelo montador. Algumas poucas pseudo-operações não possuem parâmetros, como NOP e HCF. As regras para um programa de montagem válido são:
+
+\begin{itemize}
+\item Comentários devem ser iniciados por um caracter ponto e vírgula (;) à esquerda, sem tabulações.
+\item Rótulos devem ser declarados com alinhamento à esquerda, sem tabulações, e sem finalizador (dois pontos).
+\item Instruções devem ser alinhadas à esquerda, com uma única tabulação.
+\item Instruções devem ser representadas por dois campos: mnemônico e parâmetros (se existirem). O separador dos dois campos pode ser um espaço ou uma tabulação.
+\item Os elementos que compõem parâmetros de uma instrução devem ser separados por vírgula e sem espaços.
+\item Rótulos sem parâmetros definem endereços (deslocamentos) no código, e com parâmetros estruturas de dados e sua posição na memória.
+\item Estruturas de dados são definidas por dois tipos básicos (byte e inteiro). No tipo byte, os valores são representados por um conjunto de bytes e no tipo inteiro podem ser definidos por apenas um valor (variável) ou uma lista de valores separados por um espaço (vetor de inteiros).
+\item Valores das estruturas de dados podem ser bytes (\textit{string}) delimitados por aspas ou valores numéricos, representados em decimal (123), hexadecimal (0x123), octal (0o123) ou binário (0b1010).
+\item Caracteres especiais aceitos em \textit{strings} são $\backslash t$, $\backslash n$ e $\backslash r$.
+\item Instruções e dados podem ser misturados.
+\end{itemize}
+
+Para a montagem de código, são realizadas três passadas em sequência. Cada uma possui um papel fundamental na transformação do programa em linguagem de montagem para código de máquina. A sequência para a montagem de um programa com relação às passadas pelo código fonte em linguagem de montagem é a seguinte:
+
+\begin{enumerate}
+\item Pseudo-operações são convertidas para operações básicas equivalentes ou sequências (padrões) de instruções suportadas pela arquitetura;
+\item Rótulos são resolvidos (convertidos) para endereços e uma tabela de símbolos é montada;
+\item Instruções e dados são montados (traduzidos), um a um, a partir da listagem gerada no passo anterior e da tabela de símbolos.
+\end{enumerate}
+
+\subsection{Sintaxe de linha de comando}
+
+A entrada e saída padrão devem ser utilizadas para processar um arquivo em linguagem de montagem e armazenar o código objeto gerado. Além disso, o script do montador deve ser invocado com o interpretador Python (versão 2.7):
+
+\begin{verbatim}
+$ python assemble16.py < input.asm > output.out
+\end{verbatim}
+
+O seguinte código em linguagem de montagem,
+
+\lstinputlisting[caption=ninetoone.asm]{../examples/ninetoone.asm}
+
+após ser processado pelo montador, resulta no seguinte código objeto:
+
+\lstinputlisting[multicols=2,caption=ninetoone.out]{../examples/ninetoone.out}
+
+O arquivo de entrada \textit{input.asm} será processado e o código objeto (pronto para ser executado no simulador) será armazenado em \textit{output.txt}. Uma listagem completa é obtida (para depuração do código, por exemplo), se o script for executado com o parâmetro \textit{debug}:
+
+\begin{verbatim}
+$ python assemble16.py debug < input.asm > output.out
+\end{verbatim}
+
+O resultado será uma listagem contendo além dos endereços e código objeto, os rótulos e código intermediário do processo de montagem. O simulador não pode executar essa listagem diretamente, no entanto.
+
+\lstinputlisting[multicols=2,caption=ninetoone\_debug.out]{../examples/ninetoone_debug.out}
+
+Caso ocorra algum erro de montagem, o script irá terminar silenciosamente. Erros de montagem podem ser verificados no código objeto gerado, onde nas linhas em que ocorreram erros será apresentado um padrão \texttt{**** ????}. O código objeto resultante será rejeitado pelo simulador caso exista algum erro na montagem.
+
+Diversos arquivos de código fonte podem ser combinados (concatenados) e usados como uma única entrada para o montador. A sintaxe é:
+
+\begin{verbatim}
+$ cat fonte1.asm fonte2.asm fonte3.asm | python assemble16.py > output.out
+\end{verbatim}
+
+\section{Simulador}
+
+Assim como o programa montador, o simulador foi implementado na linguagem Python. Apesar da simulação ser bastante lenta em função do interpretador Python, a descrição mostrou-se adequada para a verificação do comportamento da arquitetura. Esse implementação de referência é simples de ser entendida, o que permite um porte fácil do simulador para outras linguagens de alto desempenho (como C, por exemplo).
+
+\subsection{Mapa de memória}
+
+O simulador implementa o modelo de execução da arquitetura Viking, incluindo uma memória e mecanismos básicos de entrada e saída. O espaço de endereçamento é compartilhado entre dados e instruções, por questões de simplicidade. Os espaços de endereçamento possuem algumas diferenças entre os simuladores da arquitetura de 16 e 32 bits. 
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{5.0cm}|p{3.0cm}|p{3.0cm}|}
+\hline
+\bf{Papel} 		& \bf{16 bits} 		& \bf{32 bits}		\\ \hline \hline
+Código + dados (início)	& \texttt{0x0000}	& \texttt{0x00000000}	\\ \hline
+Apontador de pilha	& \texttt{0xdffe}	& \texttt{0x000ffffc}	\\ \hline
+Saída (caracter)	& \texttt{0xf000}	& \texttt{0xf0000000}	\\ \hline
+Saída (inteiro)		& \texttt{0xf002}	& \texttt{0xf0000004}	\\ \hline
+Entrada (caracter)	& \texttt{0xf004}	& \texttt{0xf0000008}	\\ \hline
+Entrada (inteiro)	& \texttt{0xf006}	& \texttt{0xf000000c}	\\ \hline
+\end{tabular}
+\end{table}
+
+No início da simulação, o apontador de pilha (\textit{sp}) é inicializado para o topo da pilha, que coindide com o final da memória. A execução do programa começa a partir do endereço zero, após o programa ser carregado para a memória.
+
+\subsection{Sintaxe de linha de comando}
+
+Assim como o montador, a entrada e saída padrão são usadas pelo simulador para a leitura do código objeto e dispositivos de entrada e saída apresentados no mapa de memória. Para a execução de um programa, o simulador deve ser invocado da seguinte forma:
+
+\begin{verbatim}
+$ python run16.py < output.out
+
+[program (code + data): 38 bytes]
+[memory size: 57344]
+9 8 7 6 5 4 3 2 1 
+[ok]
+112 cycles
+\end{verbatim}
+
+Nesse caso, \textit{output.out} foi gerado no processo de montagem e é usado como entrada para o simulador. Caso seja necessário executar o programa instrução por instrução, pode-se usar o parâmetro \textit{debug}:
+
+\begin{verbatim}
+$ python run16.py debug < output.out
+\end{verbatim}
+
+Case seja necessário montar o programa e executá-lo no simulador, é possível invocar o montador e direcionar sua saída à entrada do simulador, através de um \textit{pipe}. Com isso, evita-se a necessidade de criação de um arquivo intermediário, e pode-se executar o programa a partir de seu código de montagem:
+
+\begin{verbatim}
+$ python assemble16.py < input.asm | python run16.py
+\end{verbatim}
+
+\appendix
+
+\chapter{Rotinas \textit{mulsi3}, \textit{divsi3}, \textit{modsi3} e \textit{udivmodsi4}}
+\label{ref:muldiv}
+
+\lstinputlisting[multicols=2,caption=mulsi3.asm]{../examples/mulsi3.asm}
+\lstinputlisting[multicols=2,caption=divsi3.asm]{../examples/divsi3.asm}
+\lstinputlisting[multicols=2,caption=modsi3.asm]{../examples/modsi3.asm}
+\lstinputlisting[multicols=2,caption=udivmodsi4.asm]{../examples/udivmodsi4.asm}
+
+\chapter{Exemplos}
+
+\lstinputlisting[multicols=2,caption=hello\_world.asm]{../examples/hello_world.asm}
+\lstinputlisting[multicols=2,caption=fibonacci.asm]{../examples/fibonacci.asm}
+\lstinputlisting[multicols=2,caption=function\_call.asm]{../examples/function_call.asm}
+\lstinputlisting[multicols=2,caption=mult.asm]{../examples/mult.asm}
+\lstinputlisting[multicols=2,caption=bubble\_sort.asm]{../examples/bubble_sort.asm}
+
+\chapter{Montador - código fonte}
+
+\lstinputlisting[language=Python,caption=assemble16.py]{../assemble16.py}
+
+\chapter{Simulador - código fonte}
+
+\lstinputlisting[language=Python,caption=run16.py]{../run16.py}
+
+\end{document}
