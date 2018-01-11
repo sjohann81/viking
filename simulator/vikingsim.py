@@ -235,25 +235,6 @@ def pass3(program) :
 			code += ("???? %s" % lin)
 	return code
 
-#
-# simulator and user interface
-#
-context = [
-	0x0000, 0x0000, 0x0000, 0x0000,		# r0 - r3
-	0x0000, 0x0000, 0x0000, 0xdffe,		# r4 - r7
-	0x0000, 0x0000, 0x0000			# pc, stack limit, breakpoint
-]
-
-memory = []
-
-cycles = 0
-cycle_delay = 1
-RUNNING = -1
-STOPPED = -2
-machine = STOPPED
-
-reg_names = ['r0 (at) : ', 'r1      : ', 'r2      : ', 'r3      : ', 'r4      : ', 'r5 (sr) : ', 'r6 (lr) : ', 'r7 (sp) : ', '\nPC      : ']
-
 def check(program) :
 	for lin in program :
 		flds = string.split(lin)
@@ -341,39 +322,7 @@ def loaderror(program) :
 	out.see(END)
 	reset()	
 
-	
-def NewFile() :
-	textasm.delete('1.0', END)
-    
-def OpenFile() :
-	name = askopenfilename()
-	if (name) :
-		program = open(name, "r")
-		if program :
-			program.seek(0)
-			textasm.delete('1.0', END)
-			for lin in program :
-				textasm.insert(END, lin)
-			program.close()
 
-def OpenAdditionalFile() :
-	name = askopenfilename()
-	if (name) :
-		program = open(name, "r")
-		if program :
-			program.seek(0)
-			for lin in program :
-				textasm.insert(END, lin)
-			program.close()
-
-def SaveFile() :
-	name = asksaveasfilename()
-	if (name) :
-		program = open(name, "w")
-		if program :
-			program.write(textasm.get('1.0', 'end'))
-			program.close()
-    
 def assembler() :
 	global lookup
 	out.insert(END, "\nAssembling...")
@@ -396,6 +345,25 @@ def assembler() :
 		loaderror(code)
 	else :
 		load(code)
+
+#
+# simulator and user interface
+#
+context = [
+	0x0000, 0x0000, 0x0000, 0x0000,		# r0 - r3
+	0x0000, 0x0000, 0x0000, 0xdffe,		# r4 - r7
+	0x0000, 0x0000, 0x0000			# pc, stack limit, breakpoint
+]
+
+memory = []
+
+cycles = 0
+cycle_delay = 1
+RUNNING = -1
+STOPPED = -2
+machine = STOPPED
+
+reg_names = ['r0 (at) : ', 'r1      : ', 'r2      : ', 'r3      : ', 'r4      : ', 'r5 (sr) : ', 'r6 (lr) : ', 'r7 (sp) : ', '\nPC      : ']
 
 def cycle() :
 	global cycles
@@ -516,6 +484,39 @@ def cycle() :
 	refresh_regs()
 	
 	return 1
+	
+	
+def newprogram() :
+	textasm.delete('1.0', END)
+    
+def openprogram() :
+	name = askopenfilename()
+	if (name) :
+		program = open(name, "r")
+		if program :
+			program.seek(0)
+			textasm.delete('1.0', END)
+			for lin in program :
+				textasm.insert(END, lin)
+			program.close()
+
+def openadditionalprogram() :
+	name = askopenfilename()
+	if (name) :
+		program = open(name, "r")
+		if program :
+			program.seek(0)
+			for lin in program :
+				textasm.insert(END, lin)
+			program.close()
+
+def saveprogram() :
+	name = asksaveasfilename()
+	if (name) :
+		program = open(name, "w")
+		if program :
+			program.write(textasm.get('1.0', 'end'))
+			program.close()
 
 def reset() :
 	global cycles, machine
@@ -551,12 +552,16 @@ def run_step() :
 		textdump.activate(context[8] >> 1)
 		textdump.see(context[8] >> 1)
 
-		if context[7] < context[9] :
-			out.insert(END, ("\nStack overflow detected at %04x.\n" % context[8]))
+		if context[8] == context[10] :
+			out.insert(END, ("\nBreakpoint at %04x.\n" % context[8]))
 			out.see(END)
-		else :
-			if machine != STOPPED :
-				root.after(cycle_delay, run_step)
+		else:
+			if context[7] < context[9] :
+				out.insert(END, ("\nStack overflow detected at %04x.\n" % context[8]))
+				out.see(END)
+			else :
+				if machine != STOPPED :
+					root.after(cycle_delay, run_step)
 	else :
 		out.insert(END, ("\nProgram halted at %04x.\n" % context[8]))
 		out.see(END)
@@ -648,10 +653,10 @@ root.config(menu=menu)
 
 programmenu = Menu(menu)
 menu.add_cascade(label="Program", menu=programmenu)
-programmenu.add_command(label="New", command=NewFile)
-programmenu.add_command(label="Load", command=OpenFile)
-programmenu.add_command(label="Load additional file", command=OpenAdditionalFile)
-programmenu.add_command(label="Save as", command=SaveFile)
+programmenu.add_command(label="New", command=newprogram)
+programmenu.add_command(label="Load", command=openprogram)
+programmenu.add_command(label="Load additional file", command=openadditionalprogram)
+programmenu.add_command(label="Save as", command=saveprogram)
 programmenu.add_separator()
 programmenu.add_command(label="Assemble", command=assembler)
 programmenu.add_separator()

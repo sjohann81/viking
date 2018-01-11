@@ -52,7 +52,5 @@
 \contentsline {section}{\numberline {3.2}Simulador}{23}
 \contentsline {subsection}{\numberline {3.2.1}Mapa de mem\IeC {\'o}ria}{24}
 \contentsline {subsection}{\numberline {3.2.2}Sintaxe de linha de comando}{24}
-\contentsline {chapter}{\numberline {A}Rotinas \textit {mulsi3}, \textit {divsi3}, \textit {modsi3} e \textit {udivmodsi4}}{25}
-\contentsline {chapter}{\numberline {B}Exemplos}{28}
-\contentsline {chapter}{\numberline {C}Montador - c\IeC {\'o}digo fonte}{31}
-\contentsline {chapter}{\numberline {D}Simulador - c\IeC {\'o}digo fonte}{37}
+\contentsline {chapter}{\numberline {A}Exemplos}{25}
+\contentsline {chapter}{\numberline {B}Rotinas \textit {mulsi3}, \textit {divsi3}, \textit {modsi3} e \textit {udivmodsi4}}{28}

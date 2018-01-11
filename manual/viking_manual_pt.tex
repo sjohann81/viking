@@ -51,7 +51,7 @@
 \begin{document}
 
 \pagestyle{empty}
-\title{\textbf{Viking CPU - Manual de referência v0.2}}
+\title{\textbf{Viking CPU - Manual de referência v0.3}}
 \author{Sérgio Johann Filho}
 
 \maketitle
@@ -1033,14 +1033,6 @@ $ python assemble16.py < input.asm | python run16.py
 
 \appendix
 
-\chapter{Rotinas \textit{mulsi3}, \textit{divsi3}, \textit{modsi3} e \textit{udivmodsi4}}
-\label{ref:muldiv}
-
-\lstinputlisting[multicols=2,caption=mulsi3.asm]{../examples/mulsi3.asm}
-\lstinputlisting[multicols=2,caption=divsi3.asm]{../examples/divsi3.asm}
-\lstinputlisting[multicols=2,caption=modsi3.asm]{../examples/modsi3.asm}
-\lstinputlisting[multicols=2,caption=udivmodsi4.asm]{../examples/udivmodsi4.asm}
-
 \chapter{Exemplos}
 
 \lstinputlisting[multicols=2,caption=hello\_world.asm]{../examples/hello_world.asm}
@@ -1049,12 +1041,12 @@ $ python assemble16.py < input.asm | python run16.py
 \lstinputlisting[multicols=2,caption=mult.asm]{../examples/mult.asm}
 \lstinputlisting[multicols=2,caption=bubble\_sort.asm]{../examples/bubble_sort.asm}
 
-\chapter{Montador - código fonte}
+\chapter{Rotinas \textit{mulsi3}, \textit{divsi3}, \textit{modsi3} e \textit{udivmodsi4}}
+\label{ref:muldiv}
 
-\lstinputlisting[language=Python,caption=assemble16.py]{../assemble16.py}
-
-\chapter{Simulador - código fonte}
-
-\lstinputlisting[language=Python,caption=run16.py]{../run16.py}
+\lstinputlisting[multicols=2,caption=mulsi3.asm]{../examples/mulsi3.asm}
+\lstinputlisting[multicols=2,caption=divsi3.asm]{../examples/divsi3.asm}
+\lstinputlisting[multicols=2,caption=modsi3.asm]{../examples/modsi3.asm}
+\lstinputlisting[multicols=2,caption=udivmodsi4.asm]{../examples/udivmodsi4.asm}
 
 \end{document}
