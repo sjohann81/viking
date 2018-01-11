@@ -109,7 +109,7 @@ def pass1(program) :
 							program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
 							program.insert(i+4, "\tbez	r0," + parts[0] + ",sr\n");
 					else :
-						program[i] = "\nbez	r0," + parts[0] + "," + parts[1] + "\n"
+						program[i] = "\tbez	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "bnz" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						if is_number(parts[1]) == False :
@@ -119,7 +119,7 @@ def pass1(program) :
 							program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
 							program.insert(i+4, "\tbnz	r0," + parts[0] + ",sr\n");
 					else :
-						program[i] = "\nbnz	r0," + parts[0] + "," + parts[1] + "\n"
+						program[i] = "\tbnz	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "lsrm" and len(parts) == 2 and is_number(parts[1]) == False :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[0] + ",r0\n"
 					program.insert(i+1, "\tsub	" + parts[1] + ",1\n")

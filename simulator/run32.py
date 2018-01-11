@@ -107,32 +107,32 @@ def cycle() :
 	elif (imm == 0 and op2 == 2) :
 		if opc == 0 :
 					if (rs2 & 0x1) :
-						byte = memory[rs2 >> 1] & 0xff
+						byte = memory[(rs2 & 0xffffffff) >> 1] & 0xff
 					else :
-						byte = memory[rs2 >> 1] >> 8
+						byte = memory[(rs2 & 0xffffffff) >> 1] >> 8
 						
 					if byte > 0x7f : context[rst] = byte - 0x100
 					else : context[rst] = byte
 		elif opc == 1 :
 					if (rs2 & 0x1) :
-						memory[rs2 >> 1] = (memory[rs2 >> 1] & 0xff00) | (rs1 & 0xff)
+						memory[(rs2 & 0xffffffff) >> 1] = (memory[(rs2 & 0xffffffff) >> 1] & 0xff00) | (rs1 & 0xff)
 					else :
-						memory[rs2 >> 1] = (memory[rs2 >> 1] & 0x00ff) | ((rs1 & 0xff) << 8)
+						memory[(rs2 & 0xffffffff) >> 1] = (memory[(rs2 & 0xffffffff) >> 1] & 0x00ff) | ((rs1 & 0xff) << 8)
 		elif opc == 4 :
 					if (rs2 & 0xffffffff) == 0xf0000008 :			# emulate an input character device
-						content[rst] = chr(raw_input('char? '));
+						context[rst] = chr(raw_input('char? '));
 					elif (rs2 & 0xffffffff) == 0xf000000c :			# emulate an input integer device
 						context[rst] = int(raw_input('int? '));
 					else :
-						context[rst] = (memory[rs2 >> 1] << 16) | (memory[(rs2 >> 1) + 1])
+						context[rst] = (memory[(rs2 & 0xffffffff) >> 1] << 16) | (memory[((rs2 & 0xffffffff) >> 1) + 1])
 		elif opc == 5 :		
 					if (rs2 & 0xffffffff) == 0xf0000000 :			# emulate an output device
 						sys.stdout.write(chr(rs1 & 0xff))
 					elif (rs2 & 0xffffffff) == 0xf0000004 :			# emulate an output integer device
 						sys.stdout.write(str(rs1))
 					else :
-						memory[rs2 >> 1] = rs1 >> 16
-						memory[(rs2 >> 1) + 1] = rs1 & 0xffff
+						memory[(rs2 & 0xffffffff) >> 1] = rs1 >> 16
+						memory[((rs2 & 0xffffffff) >> 1) + 1] = rs1 & 0xffff
 		else :			print ("[error (invalid load/store instruction)]")
 	else :				print ("[error (invalid instruction)]")
 
