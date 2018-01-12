@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, string, threading
+import sys, string
 from Tkinter import *
 from tkMessageBox import *
 from tkFileDialog import askopenfilename, asksaveasfilename
