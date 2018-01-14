@@ -137,6 +137,7 @@ def pass2(program) :
 		if lin[0] > ' ' :
 			symb = flds[0]						# a symbol - save its address in lookup
 			lookup[symb] = pc
+			textsym.insert(END, "%s" % tohex(pc) + ' ' + str(symb))
 			flds2 = ' '.join(flds[1:])
 			if flds2 :
 				if flds2[0] == '"' and flds2[-1] == '"' :
@@ -328,7 +329,7 @@ def assembler() :
 	out.insert(END, "\nAssembling...")
 	out.see(END)
 	source_program = str(textasm.get('1.0', 'end'))
-
+	textsym.delete(0, END)
 	program = source_program.splitlines()
 
 	lookup = {
@@ -488,6 +489,7 @@ def cycle() :
 	
 def newprogram() :
 	textasm.delete('1.0', END)
+	textasm.delete('1.0', END)
     
 def openprogram() :
 	name = askopenfilename()
@@ -506,6 +508,7 @@ def openadditionalprogram() :
 		program = open(name, "r")
 		if program :
 			program.seek(0)
+			textasm.insert(END, "\n")
 			for lin in program :
 				textasm.insert(END, lin)
 			program.close()
@@ -676,41 +679,52 @@ machinemenu.add_command(label="Memory dump", command=memdump)
 
 topframe = Frame(root)
 topframe.pack()
+middleframe = Frame(root)
+middleframe.pack()
 bottomframe = Frame(root)
 bottomframe.pack()
 
-textasm = Text(topframe, height=24, width=50, font=('Courier', 12))
-textasmscroll = Scrollbar(topframe, command=textasm.yview)
+Label(topframe, text="Program:", width=46, font=('Courier', 11, 'bold'), anchor=W).pack(side=LEFT)
+Label(topframe, text="Object code / disassembly:", width=28, font=('Courier', 11, 'bold'), anchor=W).pack(side=LEFT)
+Label(topframe, text="Symbol table:", width=22, font=('Courier', 11, 'bold'), anchor=W).pack(side=LEFT)
+Label(topframe, text="Registers:", width=16, font=('Courier', 11, 'bold'), anchor=W).pack(side=LEFT)
+
+textasm = Text(middleframe, height=24, width=44, font=('Courier', 11))
+textasmscroll = Scrollbar(middleframe, command=textasm.yview)
 textasm.configure(yscrollcommand=textasmscroll.set)
 textasm.pack(side=LEFT, fill=BOTH)
 textasmscroll.pack(side=LEFT, fill=Y)
 
-textdump = Listbox(topframe, height=24, width=26, font=('Courier', 12))
-textdumpscroll = Scrollbar(topframe, command=textdump.yview)
+textdump = Listbox(middleframe, height=24, width=26, font=('Courier', 11))
+textdumpscroll = Scrollbar(middleframe, command=textdump.yview)
 textdump.configure(yscrollcommand=textdumpscroll.set)
 textdump.pack(side=LEFT, fill=BOTH)
 textdumpscroll.pack(side=LEFT, fill=Y)
 
-Label(topframe, text="Registers:\n", width=25, font=('Courier', 12, 'bold')).pack()
+textsym = Listbox(middleframe, height=24, width=18, font=('Courier', 11))
+textsymscroll = Scrollbar(middleframe, command=textsym.yview)
+textsym.configure(yscrollcommand=textsymscroll.set)
+textsym.pack(side=LEFT, fill=BOTH)
+textsymscroll.pack(side=LEFT, fill=Y)
 
 root.reg_label = []
 for i in range(9):
 	root.reg_label.append(StringVar())
 
 for i in range(9) :
-	Label(topframe, textvariable=root.reg_label[i], width=25, font=('Courier', 12)).pack()
+	Label(middleframe, textvariable=root.reg_label[i], width=25, font=('Courier', 11)).pack()
 	
-Label(topframe, text="\nControl:\n", width=25, font=('Courier', 12, 'bold')).pack()
+Label(middleframe, text="\nControl:\n", width=25, font=('Courier', 11, 'bold')).pack()
 
 root.cycle = StringVar()
-Label(topframe, textvariable=root.cycle, width=25, font=('Courier', 12)).pack()
+Label(middleframe, textvariable=root.cycle, width=25, font=('Courier', 11)).pack()
 
 refresh_regs()
 
-Button(topframe, text='Reset', width=14, command=reset).pack()
-Button(topframe, text='Stop', width=14, command=stop).pack()
-Button(topframe, text='Run', width=14, command=run).pack()
-Button(topframe, text='Step', width=14, command=step).pack()
+Button(middleframe, text='Reset', width=14, command=reset).pack()
+Button(middleframe, text='Stop', width=14, command=stop).pack()
+Button(middleframe, text='Run', width=14, command=run).pack()
+Button(middleframe, text='Step', width=14, command=step).pack()
 
 out = Text(bottomframe, height=14, width=122, font=('Courier', 10))
 outscroll = Scrollbar(bottomframe, command=out.yview)
