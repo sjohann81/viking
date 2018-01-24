@@ -51,8 +51,8 @@ def pass1(program) :
 				if flds[0] == "not" :
 					program[i] = "\txor	" + parts[0] + ",-1\n"
 				if flds[0] == "neg" :
-					program[i] = "\txor	at,at,at\n"
-					program[i].insert(i+1, "\tsub	" + parts[0] + ",at," + parts[0] + "\n")
+					program[i] = "\txor	" + parts[0] + ",-1\n"
+					program.insert(i+1, "\tadd	" + parts[0] + ",1\n")
 				if flds[0] == "lsr" :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "asr" :
@@ -61,63 +61,63 @@ def pass1(program) :
 					program[i] = "\tadd	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "ldi" :
 					program[i] = "\tldc0	" + flds[1] + "\n";
-					program.insert(i+1, "\tldc1	" + flds[1] + "\n");
-					program.insert(i+2, "\tldc2	" + flds[1] + "\n");
-					program.insert(i+3, "\tldc3	" + flds[1] + "\n");
+					program.insert(i+1, "\tldc1	" + flds[1] + "\n")
+					program.insert(i+2, "\tldc2	" + flds[1] + "\n")
+					program.insert(i+3, "\tldc3	" + flds[1] + "\n")
 				if flds[0] == "ldb" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	sr," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n");
-						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n");
-						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
-						program.insert(i+4, "\tldb	" + parts[0] + ",r0,sr\n");
+						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n")
+						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n")
+						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n")
+						program.insert(i+4, "\tldb	" + parts[0] + ",r0,sr\n")
 					else :
 						program[i] = "\tldb	" + parts[0] + ",r0," + parts[1] + "\n"
 				if flds[0] == "stb" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	sr," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n");
-						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n");
-						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
-						program.insert(i+4, "\tstb	r0," + parts[0] + ",sr\n");
+						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n")
+						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n")
+						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n")
+						program.insert(i+4, "\tstb	r0," + parts[0] + ",sr\n")
 					else :
 						program[i] = "\tstb	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "ldw" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	sr," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n");
-						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n");
-						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
-						program.insert(i+4, "\tldw	" + parts[0] + ",r0,sr\n");
+						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n")
+						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n")
+						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n")
+						program.insert(i+4, "\tldw	" + parts[0] + ",r0,sr\n")
 					else :
 						program[i] = "\tldw	" + parts[0] + ",r0," + parts[1] + "\n"
 				if flds[0] == "stw" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	sr," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n");
-						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n");
-						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
-						program.insert(i+4, "\tstw	r0," + parts[0] + ",sr\n");
+						program.insert(i+1, "\tldc1	sr," + parts[1] + "\n")
+						program.insert(i+2, "\tldc2	sr," + parts[1] + "\n")
+						program.insert(i+3, "\tldc3	sr," + parts[1] + "\n")
+						program.insert(i+4, "\tstw	r0," + parts[0] + ",sr\n")
 					else :
 						program[i] = "\tstw	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "bez" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						if is_number(parts[1]) == False :
 							program[i] = "\tldc0	sr," + parts[1] + "\n"
-							program.insert(i+1, "\tldc1	sr," + parts[1] + "\n");
-							program.insert(i+2, "\tldc2	sr," + parts[1] + "\n");
-							program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
-							program.insert(i+4, "\tbez	r0," + parts[0] + ",sr\n");
+							program.insert(i+1, "\tldc1	sr," + parts[1] + "\n")
+							program.insert(i+2, "\tldc2	sr," + parts[1] + "\n")
+							program.insert(i+3, "\tldc3	sr," + parts[1] + "\n")
+							program.insert(i+4, "\tbez	r0," + parts[0] + ",sr\n")
 					else :
 						program[i] = "\tbez	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "bnz" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						if is_number(parts[1]) == False :
 							program[i] = "\tldc0	sr," + parts[1] + "\n"
-							program.insert(i+1, "\tldc1	sr," + parts[1] + "\n");
-							program.insert(i+2, "\tldc2	sr," + parts[1] + "\n");
-							program.insert(i+3, "\tldc3	sr," + parts[1] + "\n");
-							program.insert(i+4, "\tbnz	r0," + parts[0] + ",sr\n");
+							program.insert(i+1, "\tldc1	sr," + parts[1] + "\n")
+							program.insert(i+2, "\tldc2	sr," + parts[1] + "\n")
+							program.insert(i+3, "\tldc3	sr," + parts[1] + "\n")
+							program.insert(i+4, "\tbnz	r0," + parts[0] + ",sr\n")
 					else :
 						program[i] = "\tbnz	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "lsrm" and len(parts) == 2 and is_number(parts[1]) == False :

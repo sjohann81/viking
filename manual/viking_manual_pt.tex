@@ -795,7 +795,7 @@ Nos formatos de pseudo operações suportadas pelo montador e pseudo operações
 \bf{Instrução} 				& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
 NOP  & No operation 			& \texttt{nop} & \texttt{and r0,r0,r0}  \\ \hline
 NOT  & One's complement 		& \texttt{not r1} & \texttt{xor r1,-1}  \\ \hline
-NEG  & Two's complement			& \texttt{neg r1} & \texttt{xor at,at,at\newline sub r1,at,r1} \\ \hline
+NEG  & Two's complement			& \texttt{neg r1} & \texttt{xor r1,-1\newline add r1,1} \\ \hline
 LSR  & Logical shift right		& \texttt{lsr r1,r2} & \texttt{lsr r1,r2,r0} \\ \hline
 ASR  & Arithmetic shift right		& \texttt{asr r1,r2} & \texttt{asr r1,r2,r0} \\ \hline
 LSL  & Logical shift left		& \texttt{lsl r1,r2} & \texttt{add r1,r2,r2} \\ \hline

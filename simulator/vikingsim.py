@@ -58,8 +58,8 @@ def pass1(program) :
 				if flds[0] == "not" :
 					program[i] = "\txor	" + parts[0] + ",-1\n"
 				if flds[0] == "neg" :
-					program[i] = "\txor	at,at,at\n"
-					program[i].insert(i+1, "\tsub	" + parts[0] + ",at," + parts[0] + "\n")
+					program[i] = "\txor	" + parts[0] + ",-1\n"
+					program.insert(i+1, "\tadd	" + parts[0] + ",1\n")
 				if flds[0] == "lsr" :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "asr" :
@@ -72,45 +72,45 @@ def pass1(program) :
 				if flds[0] == "ldb" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
-						program.insert(i+2, "\tldb	" + parts[0] + ",r0,at\n");
+						program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
+						program.insert(i+2, "\tldb	" + parts[0] + ",r0,at\n")
 					else :
 						program[i] = "\tldb	" + parts[0] + ",r0," + parts[1] + "\n"
 				if flds[0] == "stb" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
-						program.insert(i+2, "\tstb	r0," + parts[0] + ",at\n");
+						program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
+						program.insert(i+2, "\tstb	r0," + parts[0] + ",at\n")
 					else :
 						program[i] = "\tstb	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "ldw" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
-						program.insert(i+2, "\tldw	" + parts[0] + ",r0,at\n");
+						program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
+						program.insert(i+2, "\tldw	" + parts[0] + ",r0,at\n")
 					else :
 						program[i] = "\tldw	" + parts[0] + ",r0," + parts[1] + "\n"
 				if flds[0] == "stw" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
-						program.insert(i+2, "\tstw	r0," + parts[0] + ",at\n");
+						program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
+						program.insert(i+2, "\tstw	r0," + parts[0] + ",at\n")
 					else :
 						program[i] = "\tstw	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "bez" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						if is_number(parts[1]) == False :
 							program[i] = "\tldc0	at," + parts[1] + "\n"
-							program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
-							program.insert(i+2, "\tbez	r0," + parts[0] + ",at\n");
+							program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
+							program.insert(i+2, "\tbez	r0," + parts[0] + ",at\n")
 					else :
 						program[i] = "\tbez	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "bnz" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						if is_number(parts[1]) == False :
 							program[i] = "\tldc0	at," + parts[1] + "\n"
-							program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
-							program.insert(i+2, "\tbnz	r0," + parts[0] + ",at\n");
+							program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
+							program.insert(i+2, "\tbnz	r0," + parts[0] + ",at\n")
 					else :
 						program[i] = "\tbnz	r0," + parts[0] + "," + parts[1] + "\n"
 				if flds[0] == "lsrm" and len(parts) == 2 and is_number(parts[1]) == False :
@@ -535,6 +535,9 @@ def reset() :
 	
 	cycles = 0
 	refresh_regs()
+        textdump.focus()
+        textdump.activate(0)
+        textdump.see(0)
 
 def run() :
 	global machine
@@ -615,9 +618,9 @@ def clear_term() :
 def memdump() :
 	memwindow = Toplevel(root)
 	memwindow.title("Memory dump")
-	memwindow.geometry("672x692+50+50")
+	memwindow.geometry("600x652+50+50")
 	memwindow.resizable(0,0)
-	mem_dump = Listbox(memwindow, height=24, width=65, font=('Courier', 12))
+	mem_dump = Listbox(memwindow, height=24, width=65, font=('Courier', 11))
 	mem_dumpscroll = Scrollbar(memwindow, command=mem_dump.yview)
 	mem_dump.configure(yscrollcommand=mem_dumpscroll.set)
 	mem_dump.pack(side=LEFT, fill=BOTH)
