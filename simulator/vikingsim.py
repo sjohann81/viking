@@ -535,9 +535,9 @@ def reset() :
 	
 	cycles = 0
 	refresh_regs()
-        textdump.focus()
-        textdump.activate(0)
-        textdump.see(0)
+	textdump.focus()
+	textdump.activate(0)
+	textdump.see(0)
 
 def run() :
 	global machine
@@ -598,7 +598,7 @@ def step() :
 
 def refresh_regs() :
 	for i in range(9) :
-		root.reg_label[i].set(reg_names[i]+'0x'+tohex(context[i]))
+		root.reg_label[i].set(reg_names[i] + tohex(context[i]))
 	root.cycle.set("Cycle: " + str(cycles) + "\n")
 
 def set_breakpoint() :
