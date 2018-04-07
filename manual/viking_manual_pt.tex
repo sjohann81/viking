@@ -782,11 +782,11 @@ Nas tabelas de instruções são apresentados o formato da instrução (pseudo o
 
 \section{Pseudo operações básicas}
 
-Instruções de complemento são sintetizadas com operações XOR e SUB. Deslocamentos à esquerda são sintetizados com operações ADD. A carga de constantes é sintetizada de maneira trivial pelo montador, no entanto uma sequência mais otimizada pode ser gerada, como apresentado na Seção \ref{ref:constants}. O parâmetro \textit{const} da pseudo operação LDI pode ser tanto um valor numérico quanto um rótulo, tendo seu valor resolvido pelo montador.
+Instruções de complemento são sintetizadas com operações XOR e ADD. Deslocamentos à esquerda são sintetizados com operações ADD. A carga de constantes é sintetizada de maneira trivial pelo montador, no entanto uma sequência mais otimizada pode ser gerada, como apresentado na Seção \ref{ref:constants}. O parâmetro \textit{const} da pseudo operação LDI pode ser tanto um valor numérico quanto um rótulo, tendo seu valor resolvido pelo montador.
 
 Operações de carga e armazenamento e desvios podem ser especificadas com apenas dois registradores, uma vez que para essas instruções um dos registradores não é utilizado fazendo com que o formato com três registradores se torne pouco intuitivo. Os parâmetros \textit{addr} das operações BEZ e BNZ podem ser rótulos, sendo que essas operações fazem uso do registrador \textit{at} para a carga do endereço. Isso simplifica o código de montagem pois o programador não precisa carregar o endereço manualmente. Outras operações que fazem uso de rótulos são LDB, STB, LDW e STW. A operação HCF não é definida pela arquitetura, e possui funcionalidade apenas no contexto de simulação (a simulação é abortada).
 
-Nos formatos de pseudo operações suportadas pelo montador e pseudo operações adicionais, o registrador \textit{r1} é exemplificado como registrador destino ou fonte da operação, enquanto \textit{r2} é fonte.
+Nos formatos de pseudo operações suportadas pelo montador, o registrador \textit{r1} é exemplificado como registrador destino ou fonte da operação, enquanto \textit{r2} é fonte. Em casos onde o endereço necessita ser calculado em função de um rótulo, \textit{at} é fonte.
 
 \begin{table}[ht!]
 \centering
