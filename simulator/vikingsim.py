@@ -692,11 +692,14 @@ Label(topframe, text="Object code / disassembly:", width=28, font=('Courier', 11
 Label(topframe, text="Symbol table:", width=22, font=('Courier', 11, 'bold'), anchor=W).pack(side=LEFT)
 Label(topframe, text="Registers:", width=16, font=('Courier', 11, 'bold'), anchor=W).pack(side=LEFT)
 
-textasm = Text(middleframe, height=24, width=44, font=('Courier', 11))
-textasmscroll = Scrollbar(middleframe, command=textasm.yview)
-textasm.configure(yscrollcommand=textasmscroll.set)
+asmxscrollbar = Scrollbar(middleframe, orient=HORIZONTAL)
+asmyscrollbar = Scrollbar(middleframe)
+textasm = Text(middleframe, wrap=NONE, xscrollcommand=asmxscrollbar.set, yscrollcommand=asmyscrollbar.set, height=24, width=44, font=('Courier', 11))
+asmxscrollbar.pack(side=BOTTOM, fill=X)
 textasm.pack(side=LEFT, fill=BOTH)
-textasmscroll.pack(side=LEFT, fill=Y)
+asmyscrollbar.pack(side=LEFT, fill=Y)
+asmxscrollbar.config(command=textasm.xview)
+asmyscrollbar.config(command=textasm.yview)
 
 textdump = Listbox(middleframe, height=24, width=26, font=('Courier', 11))
 textdumpscroll = Scrollbar(middleframe, command=textdump.yview)
