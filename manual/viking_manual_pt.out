@@ -1,0 +1,44 @@
+\BOOKMARK [0][-]{chapter.1}{A arquitetura Viking}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Registradores}{chapter.1}% 2
+\BOOKMARK [1][-]{section.1.2}{Formatos de instru\347\343o}{chapter.1}% 3
+\BOOKMARK [2][-]{subsection.1.2.1}{Instru\347\365es tipo R}{section.1.2}% 4
+\BOOKMARK [2][-]{subsection.1.2.2}{Instru\347\365es tipo I}{section.1.2}% 5
+\BOOKMARK [1][-]{section.1.3}{Modos de endere\347amento}{chapter.1}% 6
+\BOOKMARK [1][-]{section.1.4}{Conjunto de instru\347\365es}{chapter.1}% 7
+\BOOKMARK [2][-]{subsection.1.4.1}{Computa\347\343o}{section.1.4}% 8
+\BOOKMARK [2][-]{subsection.1.4.2}{Deslocamento}{section.1.4}% 9
+\BOOKMARK [2][-]{subsection.1.4.3}{Carga e armazenamento}{section.1.4}% 10
+\BOOKMARK [2][-]{subsection.1.4.4}{Desvios condicionais}{section.1.4}% 11
+\BOOKMARK [1][-]{section.1.5}{Caracter\355sticas \372nicas}{chapter.1}% 12
+\BOOKMARK [2][-]{subsection.1.5.1}{Carga de constantes}{section.1.5}% 13
+\BOOKMARK [2][-]{subsection.1.5.2}{Extens\343o de sinal}{section.1.5}% 14
+\BOOKMARK [2][-]{subsection.1.5.3}{Desvios condicionais}{section.1.5}% 15
+\BOOKMARK [2][-]{subsection.1.5.4}{Outras opera\347\365es}{section.1.5}% 16
+\BOOKMARK [1][-]{section.1.6}{Tipos de dados}{chapter.1}% 17
+\BOOKMARK [0][-]{chapter.2}{S\355ntese de pseudo opera\347\365es}{}% 18
+\BOOKMARK [1][-]{section.2.1}{Pseudo opera\347\365es b\341sicas}{chapter.2}% 19
+\BOOKMARK [1][-]{section.2.2}{Opera\347\365es de deslocamento}{chapter.2}% 20
+\BOOKMARK [1][-]{section.2.3}{Pseudo opera\347\365es n\343o suportadas pelo montador}{chapter.2}% 21
+\BOOKMARK [2][-]{subsection.2.3.1}{Testes, sele\347\343o e desvios \(condicionais\)}{section.2.3}% 22
+\BOOKMARK [2][-]{subsection.2.3.2}{Opera\347\365es condicionais equivalentes}{section.2.3}% 23
+\BOOKMARK [2][-]{subsection.2.3.3}{Desvios incondicionais}{section.2.3}% 24
+\BOOKMARK [2][-]{subsection.2.3.4}{Opera\347\365es aritm\351ticas adicionais}{section.2.3}% 25
+\BOOKMARK [0][-]{chapter.3}{Programando com o processador Viking}{}% 26
+\BOOKMARK [1][-]{section.3.1}{Controle de fluxo do programa}{chapter.3}% 27
+\BOOKMARK [2][-]{subsection.3.1.1}{Sele\347\343o}{section.3.1}% 28
+\BOOKMARK [2][-]{subsection.3.1.2}{Repeti\347\343o}{section.3.1}% 29
+\BOOKMARK [1][-]{section.3.2}{Acesso \340 mem\363ria - vari\341veis}{chapter.3}% 30
+\BOOKMARK [1][-]{section.3.3}{Acesso \340 mem\363ria - vetores}{chapter.3}% 31
+\BOOKMARK [1][-]{section.3.4}{Chamadas de fun\347\343o e conven\347\365es de chamada}{chapter.3}% 32
+\BOOKMARK [2][-]{subsection.3.4.1}{Pilha}{section.3.4}% 33
+\BOOKMARK [2][-]{subsection.3.4.2}{Registradores}{section.3.4}% 34
+\BOOKMARK [2][-]{subsection.3.4.3}{Chamada e retorno de fun\347\365es}{section.3.4}% 35
+\BOOKMARK [0][-]{chapter.4}{Montagem de c\363digo e simula\347\343o}{}% 36
+\BOOKMARK [1][-]{section.4.1}{Montador}{chapter.4}% 37
+\BOOKMARK [2][-]{subsection.4.1.1}{Formato da linguagem de montagem}{section.4.1}% 38
+\BOOKMARK [2][-]{subsection.4.1.2}{Sintaxe de linha de comando}{section.4.1}% 39
+\BOOKMARK [1][-]{section.4.2}{Simulador}{chapter.4}% 40
+\BOOKMARK [2][-]{subsection.4.2.1}{Mapa de mem\363ria}{section.4.2}% 41
+\BOOKMARK [2][-]{subsection.4.2.2}{Sintaxe de linha de comando}{section.4.2}% 42
+\BOOKMARK [0][-]{appendix.A}{Exemplos}{}% 43
+\BOOKMARK [0][-]{appendix.B}{Rotinas mulsi3, divsi3, modsi3 e udivmodsi4}{}% 44
