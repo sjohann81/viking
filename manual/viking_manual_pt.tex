@@ -1048,7 +1048,7 @@ vet 0 0 0 0 0
 
 No código acima, o endereço do primeiro elemento do vetor é carregado em \textit{r4} com a instrução LDI. O endereço efetivo é calculado somando-se o índice (nesse caso 3) duas vezes (ou seja, 3 multiplicado por 2 em função do tipo inteiro) ao endereço inicial. O acesso ao vetor é realizado pela instrução STW, que armazena o valor de \textit{r3} no endereço efetivo armazenado em \textit{r4}.
 
-Para se realizar o acesso à um vetor de caracteres, o índice não precisa ser multiplicado pelo tamanho do tipo. Além disso usam-se instruções LDB e STB para a leitura e escrita. No exemplo abaixo o o elemento vet[10] (um espaço em branco) é substituído por uma quebra de linha ('$\backslash n$').
+Para se realizar o acesso à um vetor de caracteres, o índice não precisa ser multiplicado pelo tamanho do tipo. Além disso usam-se instruções LDB e STB para a leitura e escrita. No exemplo abaixo o elemento \textit{vet[10]} (um espaço em branco) é substituído por uma quebra de linha ('$\backslash n$').
 
 \begin{verbatim}
     ldi r4,vet
