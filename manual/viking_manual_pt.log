@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.9.28)  17 APR 2018 16:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.9.28)  18 APR 2018 18:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -807,7 +807,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.68 ...3} e \textit {udivmodsi4}}{34}{appendix.B}
+l.68 ...3} e \textit {udivmodsi4}}{35}{appendix.B}
                                                    [1])
 \tf@toc=\write4
 \openout4 = `viking_manual_pt.toc'.
@@ -1025,98 +1025,103 @@ Package babel Info: Redefining portuges shorthand "|
 
 ]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 951.
+(babel)             in language  on input line 944.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 951.
+(babel)             in language  on input line 944.
  [21]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 970.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 988.
+(babel)             in language  on input line 983.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 988.
+(babel)             in language  on input line 983.
  [22]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1010.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1025.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1028.
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1028.
+(babel)             in language  on input line 1025.
  [23]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1045.
+(babel)             in language  on input line 1029.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1048.
+(babel)             in language  on input line 1060.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1061.
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1061.
+(babel)             in language  on input line 1060.
  [24]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1062.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1086.
+(babel)             in language  on input line 1065.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1095.
+(babel)             in language  on input line 1079.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1095.
+(babel)             in language  on input line 1100.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1100.
  [25]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1118.
+(babel)             in language  on input line 1103.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1118.
+(babel)             in language  on input line 1131.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1131.
  [26]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1135.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1135.
+ [27]
 Cap\'{\i }tulo 4.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1118.
+(babel)             in language  on input line 1135.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1121.
+(babel)             in language  on input line 1138.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1124.
+(babel)             in language  on input line 1141.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1137.
+(babel)             in language  on input line 1154.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1137.
-[27
+(babel)             in language  on input line 1154.
+[28
 
 ]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1151.
+(babel)             in language  on input line 1168.
  (../examples/ninetoone.asm)
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1163.
+(babel)             in language  on input line 1180.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1163.
- [28] (../examples/ninetoone.out)
+(babel)             in language  on input line 1180.
+ [29] (../examples/ninetoone.out)
 (../examples/ninetoone_debug.out)
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1185.
+(babel)             in language  on input line 1202.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1188.
+(babel)             in language  on input line 1205.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1188.
- [29]
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1189.
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1209.
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1237.
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1237.
+(babel)             in language  on input line 1205.
  [30]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1206.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1226.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1254.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 1254.
+ [31]
 Ap\^endice A.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1237.
+(babel)             in language  on input line 1254.
 (../examples/hello_world.asm) (../examples/fibonacci.asm)
 (../examples/function_call.asm
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 44.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 44.
- [31
+ [32
 
 ]) (../examples/mult.asm)
 (../examples/bubble_sort.asm
@@ -1124,46 +1129,46 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 68.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 68.
- [32])
+ [33])
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1245.
+(babel)             in language  on input line 1262.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1245.
- [33]
+(babel)             in language  on input line 1262.
+ [34]
 Ap\^endice B.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1245.
+(babel)             in language  on input line 1262.
 (../examples/mulsi3.asm) (../examples/divsi3.asm
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 39.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 39.
- [34
+ [35
 
 ]) (../examples/modsi3.asm) (../examples/udivmodsi4.asm
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 40.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 40.
- [35])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1253.
+ [36])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1270.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1253.
+(babel)             in language  on input line 1270.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1253.
- [36]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1253.
+(babel)             in language  on input line 1270.
+ [37]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1270.
  (./viking_manual_pt.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1253.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1253.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1270.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1270.
 
 Package rerunfilecheck Info: File `viking_manual_pt.out' has not changed.
 (rerunfilecheck)             Checksum: EDF14347EE322D1A810D6A47FE4D0EF1;3292.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1253.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1270.
  ) 
 Here is how much of TeX's memory you used:
- 10032 strings out of 493013
- 142156 string characters out of 6135682
+ 10033 strings out of 493013
+ 142163 string characters out of 6135682
  622582 words of memory out of 5000000
  12786 multiletter control sequences out of 15000+600000
  23092 words of font info for 49 fonts, out of 8000000 for 9000
@@ -1190,10 +1195,10 @@ sr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts
 er/sfti0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1000.pfb></us
 r/share/texmf/fonts/type1/public/cm-super/sftt0800.pfb></usr/share/texmf/fonts/
 type1/public/cm-super/sftt1000.pfb>
-Output written on viking_manual_pt.pdf (38 pages, 582382 bytes).
+Output written on viking_manual_pt.pdf (39 pages, 583854 bytes).
 PDF statistics:
- 1198 PDF objects out of 1200 (max. 8388607)
- 1121 compressed objects within 12 object streams
- 635 named destinations out of 1000 (max. 500000)
+ 1202 PDF objects out of 1440 (max. 8388607)
+ 1124 compressed objects within 12 object streams
+ 636 named destinations out of 1000 (max. 500000)
  353 words of extra memory for PDF output out of 10000 (max. 10000000)
 

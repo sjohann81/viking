@@ -870,17 +870,17 @@ MUL / DIV / REM & Multiply / Divide / Division remainder				& \texttt{mul r1,r2,
 
 \chapter{Programando com o processador Viking}
 
-Algumas construções básicas para a programação do processador são apresentadas nas próximas seções. Nos exemplos apresentados serão usadas apenas instruções suportadas nativamente pela arquitetura e pseudo operações básicas suportadas pelo montador, com o objetivo de ilustrar padrões simples para construção de código.
+Algumas estruturas de controle básicas para a programação do processador são apresentadas nas próximas seções. Nos exemplos apresentados serão usadas apenas instruções suportadas nativamente pela arquitetura e pseudo operações básicas suportadas pelo montador, com o objetivo de ilustrar padrões simples para construção de código.
 
 \section{Controle de fluxo do programa}
 
-As construções básicas de linguagem de alto nível como seleção e repetição podem ser implementadas para o controle de fluxo de execução com apenas quatro instruções (SUB, SLT, BNZ e BEZ).
+As estruturas de controle básicas de linguagem de alto nível como seleção e repetição podem ser implementadas para o controle de fluxo de execução com apenas quatro instruções (SUB, SLT, BNZ e BEZ) na arquitetura Viking.
 
 \subsection{Seleção}
 
 \subsubsection{Igual a (==) e diferente de (!=)}
 
-Em um comando de seleção que utiliza uma comparação por igualdade (\textit{if (a == b)}), são utilizadas instruções SUB e BEZ. A idéia é que se dois valores forem iguais (nesse caso, as variáveis \textit{a} e \textit{b} estão armazenadas nos registradores \textit{r1} e \textit{r2} respectivamente) a subtração de ambos resultará em zero, e o salto (desvio condicional) será executado (\textit{if}).
+Em um comando de seleção que utiliza uma comparação por igualdade (\textit{if (a == b)}), são utilizadas instruções SUB e BEZ. A idéia é que se dois valores forem iguais (nesse caso, as variáveis \textit{a} e \textit{b} estão armazenadas nos registradores \textit{r1} e \textit{r2} respectivamente) a subtração de ambos resultará em zero, e o desvio do fluxo de controle (condicional) será executado (\textit{if}).
 
 \begin{verbatim}
     sub r3,r1,r2
@@ -891,7 +891,7 @@ if
     ...
 \end{verbatim}
 
-Quando a comparação for por não igualdade (\textit{if (a != b)}), utiliza-se uma instrução BNZ. Neste caso, sempre que o resultado da subtração for diferente de zero (ou seja, se os valores de \textit{a} e \textit{b} forem diferentes) o salto será executado.
+Quando a comparação for por não igualdade (\textit{if (a != b)}), utiliza-se uma instrução BNZ. Neste caso, sempre que o resultado da subtração for diferente de zero (ou seja, se os valores de \textit{a} e \textit{b} forem diferentes) o desvio será executado.
 
 \begin{verbatim}
     sub r3,r1,r2
@@ -904,7 +904,7 @@ if
 
 \subsubsection{Menor que (<) e maior ou igual a (>=)}
 
-Para a comparação por menor que (\textit{if (a < b)}) as instruções SLT (ou SLTU, caso os valores a serem comparados não forem sinalizados) e BNZ são utilizadas. Se o valor de \textit{r1} for menor que \textit{r2}, o resultado da comparação será diferente de zero, e o salto será executado.
+Para a implementação de seleção para uma comparação por menor que (\textit{if (a < b)}) as instruções SLT (ou SLTU, caso os valores a serem comparados não forem sinalizados) e BNZ são utilizadas. Se o valor de \textit{r1} for menor que \textit{r2}, o resultado da comparação será diferente de zero, e o salto será executado.
 
 \begin{verbatim}
     slt r3,r1,r2
@@ -928,7 +928,7 @@ if
 
 \subsubsection{Maior que (>) e menor ou igual a (<=)}
 
-Para a comparação por maior que (\textit{if (a > b)}) as instruções SLT (ou SLTU, caso os valores a serem comparados não forem sinalizados) e BNZ são utilizadas. Se o valor de \textit{r2} for menor que \textit{r1}, (ou seja, \textit{r1} for maior que \textit{r2}) o resultado da comparação será diferente de zero, e o salto será executado.
+Para a implementação de seleção para uma comparação por maior que (\textit{if (a > b)}) as instruções SLT (ou SLTU, caso os valores a serem comparados não forem sinalizados) e BNZ são utilizadas. Se o valor de \textit{r2} for menor que \textit{r1}, (ou seja, \textit{r1} for maior que \textit{r2}) o resultado da comparação será diferente de zero, e o salto será executado.
 
 \begin{verbatim}
     slt r3,r2,r1
@@ -952,7 +952,7 @@ if
 
 \subsubsection{Alternativas para menor ou igual a (<=) e maior ou igual a (>=)}
 
-Versões alternativas para as operações maior ou igual a (>=) e menor ou igual a (<=) podem ser usadas. Essas versões utilizam mais instruções, porém são mais simples de serem verificadas mentalmente. Nessas versões, os testes são realizados independentemente - primeiramente o teste por menor que (<) é realizado (usando-se SLT e BNZ), e posteriormente o teste por igualdade (==) é realizado (usando-se SUB e BEZ). A idéia é que qualquer uma das condições possa fazer com que o fluxo de execução seja desviado.
+Versões alternativas para as operações de seleção maior ou igual a (>=) e menor ou igual a (<=) podem ser usadas. Essas versões utilizam mais instruções, porém são mais simples de serem verificadas mentalmente. Nessas versões, os testes são realizados de forma independente - primeiramente o teste por menor que (<) é realizado (usando-se SLT e BNZ) pois cobre a maior parte dos casos, e posteriormente o teste por igualdade (==) é realizado (usando-se SUB e BEZ). A idéia é que qualquer uma das condições possa fazer com que o fluxo de execução seja desviado.
 
 O exemplo abaixo realiza o teste para menor ou igual a (\textit{if (a <= b)}). Para o teste de maior ou igual a (\textit{if (a >= b)}, basta inverter a ordem de \textit{r1} e \textit{r2} na primeira instrução (SLT).
 
@@ -969,11 +969,11 @@ if
 
 \subsection{Repetição}
 
-Comandos de repetição em linguagem de montagem possuem uma estrutura semelhante à comandos de seleção, com a diferença de que normalmente o fluxo será redirecionado a um ponto do código percorrido anteriormente de maneira iterativa. Além da operação de repetição (como um \textit{for}, \textit{while} ou \textit{do .. while}), muitas vezes são utilizadas construções do tipo \textit{break} (que quebra o laço incondicionalmente) e \textit{continue} (que desvia incondicionalmente para a próxima iteração do laço). Em todos os casos, são utilizadas estruturas semelhantes às apresentadas anteriormente.
+Estruturas de controle de repetição em linguagem de montagem possuem uma estrutura semelhante à estruturas de seleção, com a diferença de que normalmente o fluxo de execução será redirecionado a um ponto do código percorrido anteriormente de maneira iterativa. Além da operação de repetição (como um \textit{for}, \textit{while} ou \textit{do .. while}), muitas vezes são utilizadas comandos do tipo \textit{break} (que quebra o laço incondicionalmente) e \textit{continue} (que desvia incondicionalmente para a próxima iteração do laço). Em todos os casos, são utilizadas estruturas semelhantes às apresentadas anteriormente.
 
 \subsubsection{Repetição incondicional}
 
-Uma construção simples de repetição incondicional pode ser implementada de acordo com o padrão a seguir. Nesse exemplo, assume-se que o registrador \textit{r7} (ou \textit{sp}) nunca tenha um valor zero. Esse exemplo ilustra uma construção semelhante ao um laço \textit{while (1) \{ ... \}}.
+Um comando simples de repetição incondicional pode ser implementado de acordo com o padrão a seguir. Nesse exemplo, assume-se que o registrador \textit{r7} (ou \textit{sp}) nunca tenha um valor zero. Esse exemplo ilustra uma construção semelhante ao um laço \textit{while (1) \{ ... \}}.
 
 \begin{verbatim}
 while
@@ -984,7 +984,7 @@ endwhile
 
 \subsubsection{Repetição condicional}
 
-Um comando de repetição semelhante a \textit{while (a < b) \{ ... \}} pode ser implementado de acordo com o padrão a seguir. Nesse exemplo, as variáveis \textit{a} e \textit{b} estão armazenadas nos registradores \textit{r1} e \textit{r2} respectivamente.
+A implementação de um comando de repetição semelhante a \textit{while (a < b) \{ ... \}} é mostrado a seguir. Nesse exemplo, as variáveis \textit{a} e \textit{b} estão armazenadas nos registradores \textit{r1} e \textit{r2} respectivamente.
 
 \begin{verbatim}
 while
@@ -995,9 +995,9 @@ while
 endwhile
 \end{verbatim}
 
-Importante observar no exemplo anterior que se a comparação \textit{a < b} for falsa (ou seja, zero), o controle será desviado para o final do laço. Enquanto \textit{a < b}, o primeiro desvio não será tomado, o corpo da repetição será executado e o último comando de desvio (incondicional) irá saltar para o início do laço.
+Importante observar no exemplo anterior que se a comparação \textit{a < b} for falsa (ou seja, zero), o fluxo de execução será desviado para o final do laço. Enquanto \textit{a < b}, o primeiro desvio não será tomado, o corpo da repetição será executado e o último comando de desvio (incondicional) irá desviar o fluxo de execução para o início do laço.
 
-Para a implementação de um comando de repetição do tipo \textit{do { ... } while (a < b)} basta que o teste seja realizado no final do laço. Nesse exemplo, se a comparação \textit{a < b} for verdadeira, o controle será desviado para o início do laço.
+Para a implementação de um comando de repetição do tipo \textit{do { ... } while (a < b)} basta que o teste seja realizado no final do laço. Nesse exemplo, se a comparação \textit{a < b} for verdadeira, o fluxo de execução será desviado para o início do laço.
 
 \begin{verbatim}
 while
@@ -1009,38 +1009,55 @@ endwhile
 
 \section{Acesso à memória - variáveis}
 
-Existe um número limitado de registradores na arquitetura Viking. Parte desses registradores são usados para fins específicos (como apresentado na Seção \ref{ref:regs}, restando na maior parte dos casos apenas os registradores \textit{r1} a \textit{r4} como temporários para o armazenamento de variáveis.
+Apenas um número limitado de registradores está presente na arquitetura Viking. Parte desses registradores são usados para fins específicos (como apresentado na Seção \ref{ref:regs}), restando na maior parte dos casos apenas os registradores \textit{r1} a \textit{r5} como temporários para o armazenamento de variáveis.
 
-A arquitetura utiliza o conceito de \textit{load / store} para a carga e armazenamento (acesso à memória), uma vez que as operações lógicas e aritméticas são realizadas apenas nos registradores internos. Por exemplo, para realizar uma operação de soma entre duas variáveis e armazenar o resultado em uma terceira variável (C = A + B), é necessário um padrão semelhante ao apresentado abaixo. Assume-se que as variáveis tenham sido declaradas como dados.
+A arquitetura realiza o acesso à memória de dados apenas com instruções carga e armazenamento (\textit{load / store}). Dessa forma, os operandos precisam serem trazidos da memória, uma vez que as operações lógicas e aritméticas são realizadas apenas nos registradores internos. Por exemplo, para realizar uma operação de soma entre duas variáveis e armazenar o resultado em uma terceira variável (C = A + B), é necessário um padrão semelhante ao apresentado abaixo, que realiza 3 acessos à memória de dados.
 
 \begin{verbatim}
     ldw r1,A
     ldw r2,B
     add r3,r1,r2
     stw r3,C
+    ...
+A   123
+B   333
+C   0
 \end{verbatim}
 
-Caso uma variável seja utilizada frequentemente (um contador em um laço, por exemplo), pode-se fixar temporariamente o uso de um dos registradores para evitar operações de acesso à memória (carga da variável contador, incremento do contador e armazenamento da variável contador).
+Caso uma variável seja utilizada frequentemente (um contador em um laço, por exemplo), pode-se fixar temporariamente o uso de um dos registradores para evitar operações de acesso à memória indesejáveis (carga da variável contador, incremento do contador e armazenamento da variável contador).
 
 \section{Acesso à memória - vetores}
 
-O acesso à vetores pode ser realizado com o uso de ponteiros. Um ponteiro nada mais é que uma variável (valor inteiro) que armazena um endereço de memória. Esse endereço pode ser qualquer posição na memória e seu contúdo pode ser uma variável, a primeira posição (elemento) de um vetor ou um elemento em um determinado índice.
+O acesso à vetores pode ser realizado com o uso de ponteiros. Um ponteiro nada mais é que uma variável (valor inteiro) que armazena um endereço de memória. Dessa forma, o ponteiro é utilizado para referenciar uma posição de memória. Esse endereço pode ser qualquer posição na memória, então um ponteiro pode referenciar o conteúdo de uma variável, ou elemento de um vetor.
 
-Um detalhe importante para acesso à memória utilizando o conceito de ponteiros é que é necessário que o tipo de dados apontado seja conhecido. Por exemplo, na arquitetura Viking inteiros possuem 2 ou 4 bytes (assumiremos 2 no exemplo abaixo que envolve inteiros) e \textit{strings} possuem 1 byte por elemento. Precisamos levar isso em conta para calcular o deslocamento na memória (no acesso à vetores), que é dado por $d = i * ts$, onde $d$ é o deslocamento, $i$ é o índice do vetor e $ts$ é o tamanho do tipo de dado armazenado no vetor. Um elemento de um determinado índice de um vetor pode ser acessado considerando o endereço do primeiro elemento do vetor, somado ao deslocamento.
+Um detalhe importante para acesso à memória utilizando o conceito de ponteiros é que é necessário que o tipo de dados apontado seja conhecido. Por exemplo, na arquitetura Viking inteiros possuem 2 ou 4 bytes (2 em uma arquitetura de 16 bits, como no exemplo abaixo) e vetores de caracteres (\textit{strings}) possuem 1 byte por elemento. Precisamos levar isso em conta para calcular o deslocamento na memória durante o acesso à vetores.
 
-Para acessar o quarto elemento de um vetor e nele armazenar o valor 123 (\textit{vetor[3] = 123} por exemplo), o seguinte padrão pode ser utilizado. Assume-se que \textit{vetor} possui o tipo inteiro e possui 5 elementos.
+Para o cálculo do deslocamento, usa-se a fórmula $d = i * ts$, onde $d$ é o deslocamento, $i$ é o índice do vetor e $ts$ é o tamanho do tipo de dado armazenado no vetor. Sabendo-se o deslocamento, é possível encontrar o endereço de memória efetivo de um determinado elemento em um índice $i$ de um vetor. Esse elemento $i$ pode ser acessado por um ponteiro que contém o endereço do primeiro elemento do vetor somado ao deslocamento (formando um endereço efetivo).
+
+No exemplo abaixo, o quarto elemento de um vetor será acessado e nele armazenado o valor 123 (\textit{vetor[3] = 123}. Assume-se que \textit{vetor} possui o tipo inteiro e possui 5 elementos.
 
 \begin{verbatim}
-    ldi r4,vetor
+    ldi r4,vet
     add r4,3
     add r4,3
     ldi r3,123
     stw r3,r4
     ...
-v   0 0 0 0 0
+vet 0 0 0 0 0
 \end{verbatim}
 
-No código acima, o endereço do primeiro elemento do vetor é carregado em \textit{r4} com a instrução LDI. O endereço efetivo é calculado somando-se o índice (nesse caso 3) duas vezes (ou seja, 3 multiplicado por 2) ao endereço inicial. O acesso ao vetor é realizado pela instrução STW, que armazena o valor de \textit{r3} no endereço efetivo armazenado em \textit{r4}.
+No código acima, o endereço do primeiro elemento do vetor é carregado em \textit{r4} com a instrução LDI. O endereço efetivo é calculado somando-se o índice (nesse caso 3) duas vezes (ou seja, 3 multiplicado por 2 em função do tipo inteiro) ao endereço inicial. O acesso ao vetor é realizado pela instrução STW, que armazena o valor de \textit{r3} no endereço efetivo armazenado em \textit{r4}.
+
+Para se realizar o acesso à um vetor de caracteres, o índice não precisa ser multiplicado pelo tamanho do tipo. Além disso usam-se instruções LDB e STB para a leitura e escrita. No exemplo abaixo o o elemento vet[10] (um espaço em branco) é substituído por uma quebra de linha ('$\backslash n$').
+
+\begin{verbatim}
+    ldi r4,vet
+    add r4,10
+    ldi r3,0xa
+    stb r3,r4
+    ...
+vet "fight fire with fire"
+\end{verbatim}
 
 \section{Chamadas de função e convenções de chamada}
 \label{ref:fcalls_conv}

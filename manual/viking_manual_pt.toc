@@ -53,16 +53,16 @@
 \contentsline {subsubsection}{Repeti\IeC {\c c}\IeC {\~a}o condicional}{23}{section*.23}
 \contentsline {section}{\numberline {3.2}Acesso \IeC {\`a} mem\IeC {\'o}ria - vari\IeC {\'a}veis}{23}{section.3.2}
 \contentsline {section}{\numberline {3.3}Acesso \IeC {\`a} mem\IeC {\'o}ria - vetores}{24}{section.3.3}
-\contentsline {section}{\numberline {3.4}Chamadas de fun\IeC {\c c}\IeC {\~a}o e conven\IeC {\c c}\IeC {\~o}es de chamada}{24}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}Pilha}{24}{subsection.3.4.1}
+\contentsline {section}{\numberline {3.4}Chamadas de fun\IeC {\c c}\IeC {\~a}o e conven\IeC {\c c}\IeC {\~o}es de chamada}{25}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Pilha}{25}{subsection.3.4.1}
 \contentsline {subsection}{\numberline {3.4.2}Registradores}{25}{subsection.3.4.2}
-\contentsline {subsection}{\numberline {3.4.3}Chamada e retorno de fun\IeC {\c c}\IeC {\~o}es}{25}{subsection.3.4.3}
-\contentsline {chapter}{\numberline {4}Montagem de c\IeC {\'o}digo e simula\IeC {\c c}\IeC {\~a}o}{27}{chapter.4}
-\contentsline {section}{\numberline {4.1}Montador}{27}{section.4.1}
-\contentsline {subsection}{\numberline {4.1.1}Formato da linguagem de montagem}{27}{subsection.4.1.1}
-\contentsline {subsection}{\numberline {4.1.2}Sintaxe de linha de comando}{28}{subsection.4.1.2}
-\contentsline {section}{\numberline {4.2}Simulador}{29}{section.4.2}
-\contentsline {subsection}{\numberline {4.2.1}Mapa de mem\IeC {\'o}ria}{30}{subsection.4.2.1}
-\contentsline {subsection}{\numberline {4.2.2}Sintaxe de linha de comando}{30}{subsection.4.2.2}
-\contentsline {chapter}{\numberline {A}Exemplos}{31}{appendix.A}
-\contentsline {chapter}{\numberline {B}Rotinas \textit {mulsi3}, \textit {divsi3}, \textit {modsi3} e \textit {udivmodsi4}}{34}{appendix.B}
+\contentsline {subsection}{\numberline {3.4.3}Chamada e retorno de fun\IeC {\c c}\IeC {\~o}es}{26}{subsection.3.4.3}
+\contentsline {chapter}{\numberline {4}Montagem de c\IeC {\'o}digo e simula\IeC {\c c}\IeC {\~a}o}{28}{chapter.4}
+\contentsline {section}{\numberline {4.1}Montador}{28}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Formato da linguagem de montagem}{28}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Sintaxe de linha de comando}{29}{subsection.4.1.2}
+\contentsline {section}{\numberline {4.2}Simulador}{30}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Mapa de mem\IeC {\'o}ria}{31}{subsection.4.2.1}
+\contentsline {subsection}{\numberline {4.2.2}Sintaxe de linha de comando}{31}{subsection.4.2.2}
+\contentsline {chapter}{\numberline {A}Exemplos}{32}{appendix.A}
+\contentsline {chapter}{\numberline {B}Rotinas \textit {mulsi3}, \textit {divsi3}, \textit {modsi3} e \textit {udivmodsi4}}{35}{appendix.B}
