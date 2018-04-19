@@ -28,7 +28,7 @@ loop_print
 	bnz	r7,lr
 
 sort
-	ldi	r1,0
+	ldw	r1,i
 loop_i
 	ldw	r3,N
 	sub	r3,1
@@ -38,43 +38,42 @@ loop_i
 	xor	r0,r0,r0
 	add	r2,r1,r0
 	add	r2,1
+	stw	r2,j
 loop_j
+	ldw	r1,i
 	ldw	r3,N
 	slt	r3,r2,r3
 	bez	r3,end_j
 
-	ldi	r5,numbers
-	add	r3,r5,r1
+	ldi	r4,numbers
+	add	r3,r4,r1
 	add	r3,r3,r1
-	ldw	r3,r3
-	add	r4,r5,r2
+	ldw	r1,r3
 	add	r4,r4,r2
-	ldw	r4,r4
-
-	slt	r5,r4,r3
-	bez	r5,skip
-
-	xor	r0,r0,r0
-	add	r0,r3,r0
-
-	ldi	r5,numbers
-	add	r3,r5,r1
-	add	r3,r3,r1
-	stw	r4,r3
-
-	add	r4,r5,r2
 	add	r4,r4,r2
-	stw	r0,r4
+	ldw	r2,r4
+
+	slt	r1,r2,r1
+	bez	r1,skip
+
+	ldw	r1,r3
+	stw	r1,r4
+	stw	r2,r3
 skip
+	ldw	r2,j
 	add	r2,1
+	stw	r2,j
 	bnz	r7,loop_j
 end_j
+	ldw	r1,i
 	add	r1,1
+	stw	r1,i
 	bnz	r7,loop_i
 end_i
-
 	bnz	r7,lr
 
+i	0
+j	0
 N	10
 numbers	-5 8 -22 123 77 -1 99 -33 10 12
 
