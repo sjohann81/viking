@@ -67,8 +67,17 @@ def pass1(program) :
 				if flds[0] == "lsl" :
 					program[i] = "\tadd	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "ldi" :
-					program[i] = "\tldc0	" + flds[1] + "\n";
-					program.insert(i+1, "\tldc1	" + flds[1] + "\n");
+					if is_number(parts[1]) :
+						if ((int(parts[1]) < 256) and (int(parts[1]) >= -128)) :
+							print "%d" % int(parts[1])
+							program[i] = "\tldr	" + flds[1] + "\n"
+						else :
+							continue
+#							program[i] = "\tldc0	" + flds[1] + "\n"
+#							program.insert(i+1, "\tldc1	" + flds[1] + "\n")
+					else :
+						program[i] = "\tldc0	" + flds[1] + "\n"
+						program.insert(i+1, "\tldc1	" + flds[1] + "\n")
 				if flds[0] == "ldb" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
