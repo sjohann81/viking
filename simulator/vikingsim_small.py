@@ -46,7 +46,7 @@ def pass1(program) :
 	i = 0
 	for lin in program :
 		flds = string.split(lin)
-		if flds : 
+		if flds :
 			if flds[0] == ";" :
 				program[i] = '\n'
 			if flds[0] == "nop" :
@@ -69,12 +69,10 @@ def pass1(program) :
 				if flds[0] == "ldi" :
 					if is_number(parts[1]) :
 						if ((int(parts[1]) < 256) and (int(parts[1]) >= -128)) :
-							print "%d" % int(parts[1])
 							program[i] = "\tldr	" + flds[1] + "\n"
 						else :
-							continue
-#							program[i] = "\tldc0	" + flds[1] + "\n"
-#							program.insert(i+1, "\tldc1	" + flds[1] + "\n")
+							program[i] = "\tldr	" + parts[0] + "," + str((int(parts[1]) >> 8) & 0xff) + "\n"
+							program.insert(i+1, "\tldc	" + parts[0] + "," + str(int(parts[1]) & 0xff) + "\n")
 					else :
 						program[i] = "\tldc0	" + flds[1] + "\n"
 						program.insert(i+1, "\tldc1	" + flds[1] + "\n")
@@ -169,7 +167,7 @@ def assemble(flds) :
 	"assemble instruction to machine code"
 	opval = codes.get(flds[0])
 	symb = lookup.get(flds[0])
-	if symb != None : 
+	if symb != None :
 		return symb
 	else :
 		if opval == None : return int(flds[0], 0)			# just a number (prefix can be 0x.. 0o.. 0b..)
@@ -183,7 +181,7 @@ def assemble(flds) :
 		if len(parts) == 3 :
 			parts = [0,parts[0],parts[1],parts[2]]
 			return (opval | (getval(parts[1]) << 8) | (getval(parts[2]) << 5) | (getval(parts[3]) << 2))
-			
+
 def pass3(program) :
 	"translate assembly code and symbols to machine code"
 	pc = 0
@@ -265,7 +263,7 @@ def load(program) :
 		0xa000:"bez", 0xb000:"bnz", 0x0003:"hcf"
 	}
 	memory = []
-	
+
 	textdump.delete(0, END)
 	lines = 0
 	# load program into memory
@@ -286,12 +284,12 @@ def load(program) :
 		lines += 1
 	out.insert(END, " done. Program size: " + str(len(memory) * 2) + " bytes (code + data).\n")
 	out.see(END)
-		
+
 	# set the stack limit to the end of program section
 	context[9] = (len(memory) * 2) + 2
 	# reset breakpoint
 	context[10] = context[9]
-	
+
 	# fill the rest of memory with zeroes
 	for i in range(lines, 28672) :
 		memory.append(0)
@@ -307,7 +305,7 @@ def loaderror(program) :
 		0xa000:"bez", 0xb000:"bnz", 0x0003:"hcf"
 	}
 	memory = []
-	
+
 	textdump.delete(0, END)
 	lines = 0
 	# load program into memory
@@ -330,7 +328,7 @@ def loaderror(program) :
 		lines += 1
 	out.insert(END, " program has errors.\n")
 	out.see(END)
-	reset()	
+	reset()
 
 
 def assembler() :
@@ -380,7 +378,7 @@ def cycle() :
 	pc = context[8]
 	# fetch an instruction from memory
 	instruction = memory[pc >> 1]
-	
+
 	# predecode the instruction (extract opcode fields)
 	opc = (instruction & 0xf000) >> 12
 	imm = (instruction & 0x0800) >> 11
@@ -392,7 +390,7 @@ def cycle() :
 
 	# it's halt and catch fire, halt the simulator
 	if instruction == 0x0003 : return 0
-	
+
 	# decode and execute
 	if imm == 0 :
 		if context[rs1] > 0x7fff : rs1 = context[rs1] - 0x10000
@@ -406,10 +404,10 @@ def cycle() :
 		rs2 = immediate
 
 	if ((imm == 0 and (op2 == 0 or op2 == 3)) or imm == 1) :
-		if opc == 0 :		
+		if opc == 0 :
 					if (imm == 1) : rs2 &= 0xff
 					context[rst] = rs1 & rs2
-		elif opc == 1 :		
+		elif opc == 1 :
 					if (imm == 1) : rs2 &= 0xff
 					context[rst] = rs1 | rs2
 		elif opc == 2 :		context[rst] = rs1 ^ rs2
@@ -448,7 +446,7 @@ def cycle() :
 						byte = memory[(rs2 & 0xffff) >> 1] & 0xff
 					else :
 						byte = memory[(rs2 & 0xffff) >> 1] >> 8
-						
+
 					if byte > 0x7f : context[rst] = byte - 0x100
 					else : context[rst] = byte
 		elif opc == 1 :
@@ -467,7 +465,7 @@ def cycle() :
 							context[rst] = int(result)
 					else :
 						context[rst] = memory[(rs2 & 0xffff) >> 1]
-		elif opc == 5 :		
+		elif opc == 5 :
 					if (rs2 & 0xffff) == 0xf000 :			# emulate an output character device (address: 61440)
 						out.insert(END, chr(rs1 & 0xff))
 						out.see(END)
@@ -488,18 +486,18 @@ def cycle() :
 	context[8] = pc
 	# fix the stored word to the matching hardware size
 	context[rst] &= 0xffff
-	
+
 	cycles += 1
 	# update register labels
 	refresh_regs()
-	
+
 	return 1
-	
-	
+
+
 def newprogram() :
 	textasm.delete('1.0', END)
 	textasm.delete('1.0', END)
-    
+
 def openprogram() :
 	name = askopenfilename()
 	if (name) :
@@ -541,7 +539,7 @@ def reset() :
 	context[8] = 0
 	# reset breakpoint
 	machine = STOPPED
-	
+
 	cycles = 0
 	refresh_regs()
 	textdump.focus()
@@ -550,7 +548,7 @@ def reset() :
 
 def run() :
 	global machine
-	
+
 	if len(memory) > 0 :
 		if machine == STOPPED :
 			machine = RUNNING
@@ -561,8 +559,8 @@ def run() :
 def run_step() :
 	inst = memory[context[8] >> 1]
 	last_pc = context[8]
-	
-	if cycle() : 
+
+	if cycle() :
 		textdump.focus()
 		textdump.activate(context[8] >> 1)
 		textdump.see(context[8] >> 1)
@@ -590,8 +588,8 @@ def step() :
 		stop()
 		inst = memory[context[8] >> 1]
 		last_pc = context[8]
-		
-		if cycle() : 
+
+		if cycle() :
 			textdump.focus()
 			textdump.activate(context[8] >> 1)
 			textdump.see(context[8] >> 1)
@@ -634,7 +632,7 @@ def memdump() :
 	mem_dump.configure(yscrollcommand=mem_dumpscroll.set)
 	mem_dump.pack(side=LEFT, fill=BOTH)
 	mem_dumpscroll.pack(side=LEFT, fill=Y)
-	
+
 	k = 0
 	while k < len(memory) * 2 :
 		dump_line = str(tohex(k)) + ': '
@@ -659,7 +657,7 @@ def memdump() :
 		dump_line += '|'
 		mem_dump.insert(END, dump_line)
 		k += 16
-	    
+
 root = Tk()
 menu = Menu(root)
 root.geometry("792x548+30+30")
@@ -728,7 +726,7 @@ for i in range(9):
 
 for i in range(9) :
 	Label(middleframe, textvariable=root.reg_label[i], width=25, font=('Courier', 10)).pack()
-	
+
 Label(middleframe, text="\nControl:\n", width=25, font=('Courier', 10, 'bold')).pack()
 
 root.cycle = StringVar()
