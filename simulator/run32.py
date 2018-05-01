@@ -10,6 +10,8 @@ context = [
 
 memory = []
 
+terminput = []
+
 def tohex(n):
 	return "%s" % ("0000%x" % (n & 0xffff))[-4:]
 
@@ -43,6 +45,7 @@ def load(program) :
 	print ("[memory size: %d]" % (len(memory) * 2))
 
 def cycle() :
+	global terminput
 	pc = context[8]
 	# fetch an instruction from memory
 	instruction = memory[pc >> 1]
@@ -120,9 +123,13 @@ def cycle() :
 						memory[(rs2 & 0xffffffff) >> 1] = (memory[(rs2 & 0xffffffff) >> 1] & 0x00ff) | ((rs1 & 0xff) << 8)
 		elif opc == 4 :
 					if (rs2 & 0xffffffff) == 0xf0000008 :			# emulate an input character device
-						context[rst] = chr(raw_input('char? '));
+						if len(terminput) == 0 :
+							terminput = raw_input() + '\0';
+						result = int(ord(terminput[0]))
+						terminput = terminput[1:]
+						context[rst] = result
 					elif (rs2 & 0xffffffff) == 0xf000000c :			# emulate an input integer device
-						context[rst] = int(raw_input('int? '));
+						context[rst] = int(raw_input());
 					else :
 						context[rst] = (memory[(rs2 & 0xffffffff) >> 1] << 16) | (memory[((rs2 & 0xffffffff) >> 1) + 1])
 		elif opc == 5 :		

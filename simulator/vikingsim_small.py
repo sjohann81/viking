@@ -60,6 +60,8 @@ def pass1(program) :
 				if flds[0] == "neg" :
 					program[i] = "\txor	" + parts[0] + ",-1\n"
 					program.insert(i+1, "\tadd	" + parts[0] + ",1\n")
+				if flds[0] == "mov" :
+					program[i] = "\tand	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "lsr" :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "asr" :
@@ -148,11 +150,15 @@ def pass2(program) :
 			flds2 = ' '.join(flds[1:])
 			if flds2 :
 				if flds2[0] == '"' and flds2[-1] == '"' :
+					flds2 = lin
 					flds2 = flds2[1:-1]
 					flds2 = flds2.replace("\\t", chr(0x09))
 					flds2 = flds2.replace("\\n", chr(0x0a))
 					flds2 = flds2.replace("\\r", chr(0x0d))
 					flds2 = flds2 + ' '
+					while (flds2[0] != '"') :
+						flds2 = flds2[1:]
+					flds2 = flds2[1:-2] + '\0'
 					while (len(flds2) % 2) != 0 :
 						flds2 = flds2 + ' '
 					pc = pc + len(flds2)
@@ -195,11 +201,15 @@ def pass3(program) :
 		try :
 			flds2 = ' '.join(flds)
 			if flds2[0] == '"' and flds2[-1] == '"' :
+				flds2 = lin
 				flds2 = flds2[1:-1]
 				flds2 = flds2.replace("\\t", chr(0x09))
 				flds2 = flds2.replace("\\n", chr(0x0a))
 				flds2 = flds2.replace("\\r", chr(0x0d))
 				flds2 = flds2 + '\0'
+				while (flds2[0] != '"') :
+					flds2 = flds2[1:]
+				flds2 = flds2[1:-2] + ' '
 				while (len(flds2) % 2) != 0 :
 					flds2 = flds2 + '\0'
 				flds3 = ''
@@ -209,13 +219,11 @@ def pass3(program) :
 					if flds2 == '' : break
 				flds3 = string.split(flds3)
 				instruction = assemble(flds3)
-				#print ("%04x %s" % (pc, tohex(instruction)))
 				code += ("%04x %s\n" % (pc, tohex(instruction)))
 				pc = pc + 2
 				flds3 = flds3[1:]
 				for f in flds3 :
 					instruction = assemble(flds3)
-					#print ("%04x %s" % (pc, tohex(instruction)))
 					code += ("%04x %s\n" % (pc, tohex(instruction)))
 					pc = pc + 2
 					flds3 = flds3[1:]
@@ -223,19 +231,16 @@ def pass3(program) :
 			else :
 				if codes.get(flds[0]) == None :
 					data = assemble(flds)
-					#print ("%04x %s" % (pc, tohex(data)))
 					code += ("%04x %s\n" % (pc, tohex(data)))
 					pc = pc + 2
 					flds = flds[1:]
 					for f in flds :
 						data = assemble(flds)
-						#print ("%04x %s" % (pc, tohex(data)))
 						code += ("%04x %s\n" % (pc, tohex(data)))
 						pc = pc + 2
 						flds = flds[1:]
 				else :
 					instruction = assemble(flds)
-					#print ("%04x %s" % (pc, tohex(instruction)))
 					code += ("%04x %s\n" % (pc, tohex(instruction)))
 					pc = pc + 2
 		except :
@@ -364,6 +369,7 @@ context = [
 ]
 
 memory = []
+terminput = []
 
 cycles = 0
 cycle_delay = 1
@@ -374,7 +380,7 @@ machine = STOPPED
 reg_names = ['r0 (at) : ', 'r1      : ', 'r2      : ', 'r3      : ', 'r4      : ', 'r5 (sr) : ', 'r6 (lr) : ', 'r7 (sp) : ', '\nPC      : ']
 
 def cycle() :
-	global cycles
+	global cycles, terminput
 	pc = context[8]
 	# fetch an instruction from memory
 	instruction = memory[pc >> 1]
@@ -456,9 +462,11 @@ def cycle() :
 						memory[(rs2 & 0xffff) >> 1] = (memory[(rs2 & 0xffff) >> 1] & 0x00ff) | ((rs1 & 0xff) << 8)
 		elif opc == 4 :
 					if (rs2 & 0xffff) == 0xf004 :			# emulate an input character device (address: 61444)
-						result = askstring("Input", "char val:")
-						if result :
-							context[rst] = chr(result)
+						if len(terminput) == 0 :
+							terminput = askstring("Input", "string val:") + '\0';
+						result = int(ord(terminput[0]))
+						terminput = terminput[1:]
+						context[rst] = result
 					elif (rs2 & 0xffff) == 0xf006 :			# emulate an input integer device (address: 61446)
 						result = askstring("Input", "int val:")
 						if result :

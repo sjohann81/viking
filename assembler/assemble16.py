@@ -53,6 +53,8 @@ def pass1(program) :
 				if flds[0] == "neg" :
 					program[i] = "\txor	" + parts[0] + ",-1\n"
 					program.insert(i+1, "\tadd	" + parts[0] + ",1\n")
+				if flds[0] == "mov" :
+					program[i] = "\tand	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "lsr" :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "asr" :
@@ -60,8 +62,15 @@ def pass1(program) :
 				if flds[0] == "lsl" :
 					program[i] = "\tadd	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "ldi" :
-					program[i] = "\tldc0	" + flds[1] + "\n";
-					program.insert(i+1, "\tldc1	" + flds[1] + "\n")
+					if is_number(parts[1]) :
+						if ((int(parts[1]) < 256) and (int(parts[1]) >= -128)) :
+							program[i] = "\tldr	" + flds[1] + "\n"
+						else :
+							program[i] = "\tldr	" + parts[0] + "," + str((int(parts[1]) >> 8) & 0xff) + "\n"
+							program.insert(i+1, "\tldc	" + parts[0] + "," + str(int(parts[1]) & 0xff) + "\n")
+					else :
+						program[i] = "\tldc0	" + flds[1] + "\n"
+						program.insert(i+1, "\tldc1	" + flds[1] + "\n")
 				if flds[0] == "ldb" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
@@ -133,11 +142,15 @@ def pass2(program) :
 			flds2 = ' '.join(flds[1:])
 			if flds2 :
 				if flds2[0] == '"' and flds2[-1] == '"' :
+					flds2 = lin
 					flds2 = flds2[1:-1]
 					flds2 = flds2.replace("\\t", chr(0x09))
 					flds2 = flds2.replace("\\n", chr(0x0a))
 					flds2 = flds2.replace("\\r", chr(0x0d))
 					flds2 = flds2 + ' '
+					while (flds2[0] != '"') :
+						flds2 = flds2[1:]
+					flds2 = flds2[1:-2] + '\0'
 					while (len(flds2) % 2) != 0 :
 						flds2 = flds2 + ' '
 					pc = pc + len(flds2)
@@ -186,11 +199,15 @@ def pass3(program) :
 				try :
 					flds2 = ' '.join(flds)
 					if flds2[0] == '"' and flds2[-1] == '"' :
+						flds2 = lin
 						flds2 = flds2[1:-1]
 						flds2 = flds2.replace("\\t", chr(0x09))
 						flds2 = flds2.replace("\\n", chr(0x0a))
 						flds2 = flds2.replace("\\r", chr(0x0d))
 						flds2 = flds2 + '\0'
+						while (flds2[0] != '"') :
+							flds2 = flds2[1:]
+						flds2 = flds2[1:-2] + '\0'
 						while (len(flds2) % 2) != 0 :
 							flds2 = flds2 + '\0'
 						flds3 = ''
@@ -234,11 +251,15 @@ def pass3(program) :
 			try :
 				flds2 = ' '.join(flds)
 				if flds2[0] == '"' and flds2[-1] == '"' :
+					flds2 = lin
 					flds2 = flds2[1:-1]
 					flds2 = flds2.replace("\\t", chr(0x09))
 					flds2 = flds2.replace("\\n", chr(0x0a))
 					flds2 = flds2.replace("\\r", chr(0x0d))
 					flds2 = flds2 + '\0'
+					while (flds2[0] != '"') :
+						flds2 = flds2[1:]
+					flds2 = flds2[1:-2] + '\0'
 					while (len(flds2) % 2) != 0 :
 						flds2 = flds2 + '\0'
 					flds3 = ''
