@@ -39,7 +39,7 @@ def pass1(program) :
 	i = 0
 	for lin in program :
 		flds = string.split(lin)
-		if flds : 
+		if flds :
 			if flds[0] == ";" :
 				program[i] = '\n'
 			if flds[0] == "nop" :
@@ -73,7 +73,7 @@ def pass1(program) :
 								program[i] = "\tldc0	" + flds[1] + "\n"
 								program.insert(i+1, "\tldc1	" + flds[1] + "\n")
 								program.insert(i+2, "\tldc2	" + flds[1] + "\n")
-								program.insert(i+3, "\tldc3	" + flds[1] + "\n")								
+								program.insert(i+3, "\tldc3	" + flds[1] + "\n")
 					else :
 						program[i] = "\tldc0	" + flds[1] + "\n"
 						program.insert(i+1, "\tldc1	" + flds[1] + "\n")
@@ -170,12 +170,11 @@ def pass2(program) :
 					flds2 = flds2.replace("\\t", chr(0x09))
 					flds2 = flds2.replace("\\n", chr(0x0a))
 					flds2 = flds2.replace("\\r", chr(0x0d))
-					flds2 = flds2 + ' '
 					while (flds2[0] != '"') :
 						flds2 = flds2[1:]
-					flds2 = flds2[1:-2] + '\0'
+					flds2 = flds2[1:-1] + '\0'
 					while (len(flds2) % 4) != 0 :
-						flds2 = flds2 + ' '
+						flds2 = flds2 + '\0'
 					pc = pc + len(flds2)
 				else:
 					flds = flds[1:]
@@ -188,7 +187,7 @@ def assemble(flds) :
 	"assemble instruction to machine code"
 	opval = codes.get(flds[0])
 	symb = lookup.get(flds[0])
-	if symb != None : 
+	if symb != None :
 		return symb
 	else :
 		if opval == None : return int(flds[0], 0)			# just a number (prefix can be 0x.. 0o.. 0b..)
@@ -206,7 +205,7 @@ def assemble(flds) :
 		if len(parts) == 3 :
 			parts = [0,parts[0],parts[1],parts[2]]
 			return (opval | (getval(parts[1]) << 8) | (getval(parts[2]) << 5) | (getval(parts[3]) << 2))
-			
+
 def pass3(program) :
 	"translate assembly code and symbols to machine code"
 	args = sys.argv[1:]
@@ -214,7 +213,7 @@ def pass3(program) :
 		args = args[0]
 	else :
 		args = ''
-	
+
 	pc = 0
 
 	if args == "debug" :
@@ -231,11 +230,10 @@ def pass3(program) :
 						flds2 = flds2.replace("\\t", chr(0x09))
 						flds2 = flds2.replace("\\n", chr(0x0a))
 						flds2 = flds2.replace("\\r", chr(0x0d))
-						flds2 = flds2 + '\0'
 						while (flds2[0] != '"') :
 							flds2 = flds2[1:]
-						flds2 = flds2[1:-2]
-						while (len(flds2) % 2) != 0 :
+						flds2 = flds2[1:-1] + '\0'
+						while (len(flds2) % 4) != 0 :
 							flds2 = flds2 + '\0'
 						flds3 = ''
 						while True :
@@ -291,11 +289,10 @@ def pass3(program) :
 					flds2 = flds2.replace("\\t", chr(0x09))
 					flds2 = flds2.replace("\\n", chr(0x0a))
 					flds2 = flds2.replace("\\r", chr(0x0d))
-					flds2 = flds2 + '\0'
 					while (flds2[0] != '"') :
 						flds2 = flds2[1:]
-					flds2 = flds2[1:-2] + '\0'
-					while (len(flds2) % 2) != 0 :
+					flds2 = flds2[1:-1] + '\0'
+					while (len(flds2) % 4) != 0 :
 						flds2 = flds2 + '\0'
 					flds3 = ''
 					while True :

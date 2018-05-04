@@ -155,12 +155,11 @@ def pass2(program) :
 					flds2 = flds2.replace("\\t", chr(0x09))
 					flds2 = flds2.replace("\\n", chr(0x0a))
 					flds2 = flds2.replace("\\r", chr(0x0d))
-					flds2 = flds2 + ' '
 					while (flds2[0] != '"') :
 						flds2 = flds2[1:]
-					flds2 = flds2[1:-2] + '\0'
+					flds2 = flds2[1:] + '\0'
 					while (len(flds2) % 2) != 0 :
-						flds2 = flds2 + ' '
+						flds2 = flds2 + '\0'
 					pc = pc + len(flds2)
 				else:
 					flds = flds[1:]
@@ -206,10 +205,9 @@ def pass3(program) :
 				flds2 = flds2.replace("\\t", chr(0x09))
 				flds2 = flds2.replace("\\n", chr(0x0a))
 				flds2 = flds2.replace("\\r", chr(0x0d))
-				flds2 = flds2 + '\0'
 				while (flds2[0] != '"') :
 					flds2 = flds2[1:]
-				flds2 = flds2[1:-2] + ' '
+				flds2 = flds2[1:] + '\0'
 				while (len(flds2) % 2) != 0 :
 					flds2 = flds2 + '\0'
 				flds3 = ''
