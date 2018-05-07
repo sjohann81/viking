@@ -225,6 +225,9 @@ def pass3(program) :
 				try :
 					flds2 = ' '.join(flds)
 					if flds2[0] == '"' and flds2[-1] == '"' :
+						if (pc % 4 != 0) :		# align to word boundry (32 bits)
+							print ("%08x %s" % (pc, tohex(0)))
+							pc = pc + 2
 						flds2 = lin
 						flds2 = flds2[1:-1]
 						flds2 = flds2.replace("\\t", chr(0x09))
@@ -250,9 +253,6 @@ def pass3(program) :
 							print ("%08x %s" % (pc, tohex(instruction)))
 							pc = pc + 2
 							flds3 = flds3[1:]
-						if (pc % 4 != 0) :		# align to word boundry (32 bits)
-							print ("%08x %s" % (pc, tohex(0)))
-							pc = pc + 2
 						flds = ''
 					else :
 						if codes.get(flds[0]) == None :
@@ -284,6 +284,9 @@ def pass3(program) :
 			try :
 				flds2 = ' '.join(flds)
 				if flds2[0] == '"' and flds2[-1] == '"' :
+					if (pc % 4 != 0) :	# align to word boundry (32 bits)
+						print ("%08x %s" % (pc, tohex(0)))
+						pc = pc + 2
 					flds2 = lin
 					flds2 = flds2[1:-1]
 					flds2 = flds2.replace("\\t", chr(0x09))
@@ -309,9 +312,6 @@ def pass3(program) :
 						print ("%08x %s" % (pc, tohex(instruction)))
 						pc = pc + 2
 						flds3 = flds3[1:]
-					if (pc % 4 != 0) :	# align to word boundry (32 bits)
-						print ("%08x %s" % (pc, tohex(0)))
-						pc = pc + 2
 					flds = ''
 				else :
 					if codes.get(flds[0]) == None :
