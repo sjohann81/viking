@@ -4,12 +4,12 @@ import sys, string
 
 context = [
 	0x0000, 0x0000, 0x0000, 0x0000,		# r0 - r3
-	0x0000, 0x0000, 0x0000, 0x0000,		# r4 - r7
-	0x0000, 0x0000				# pc, stack limit
+	0x0000, 0x0000, 0x0000, 0xdffe,		# r4 - r7
+	0x0000, 0x0000				# pc, stack limit, carry
 ]
 
+carry = 0
 memory = []
-
 terminput = []
 
 def tohex(n):
@@ -45,6 +45,7 @@ def load(program) :
 	print ("[memory size: %d]" % (len(memory) * 2))
 
 def cycle() :
+	global carry
 	global terminput
 	pc = context[8]
 	# fetch an instruction from memory
@@ -58,7 +59,7 @@ def cycle() :
 	rs2 = (instruction & 0x001c) >> 2
 	op2 = instruction & 0x0003
 	immediate = instruction & 0x00ff
-
+	
 	# it's halt and catch fire, halt the simulator
 	if instruction == 0x0003 : return 0
 	
@@ -73,8 +74,14 @@ def cycle() :
 		else : rs1 = context[rst]
 		if immediate > 0x7f : immediate -= 0x100
 		rs2 = immediate
-
-	if ((imm == 0 and (op2 == 0 or op2 == 3)) or imm == 1) :
+		
+	if (opc == 10) :
+		if op2 == 0 :		context[rst] = (rs1 & 0xffff) >> 1
+		elif op2 == 1 :		context[rst] = rs1 >> 1
+		elif op2 == 2 :	context[rst] = (carry << 15) & ((rs1 & 0xffff) >> 1)
+		else :			print ("[error (invalid shift instruction)]")
+		carry = rs1 & 1
+	elif ((imm == 0 and (op2 == 0 or op2 == 1)) or imm == 1) :
 		if opc == 0 :		
 					if (imm == 1) : rs2 &= 0xff
 					context[rst] = rs1 & rs2
@@ -88,25 +95,31 @@ def cycle() :
 		elif opc == 4 :
 					if (rs1 & 0xffff) < (rs2 & 0xffff) : context[rst] = 1
 					else : context[rst] = 0
-		elif opc == 5 :		context[rst] = (rs1 & 0xffff) + (rs2 & 0xffff)
-		elif opc == 6 :		context[rst] = (rs1 & 0xffff) - (rs2 & 0xffff)
+		elif opc == 5 :
+					if (imm == 0 and op2 == 1) :
+						context[rst] = (rs1 & 0xffff) + (rs2 & 0xffff) + carry;
+					else :
+						context[rst] = (rs1 & 0xffff) + (rs2 & 0xffff)
+					carry = (context[rst] & 0x10000) >> 16
+		elif opc == 6 :
+					if (imm == 0 and op2 == 1) :
+						context[rst] = (rs1 & 0xffff) - (rs2 & 0xffff) - carry;
+					else :
+						context[rst] = (rs1 & 0xffff) - (rs2 & 0xffff)
+					carry = (context[rst] & 0x10000) >> 16
 		elif opc == 8 :		context[rst] = rs2
 		elif opc == 9 :		context[rst] = (context[rst] << 8) | (rs2 & 0xff)
-		elif opc == 10 :
+		elif opc == 12 :
 					if (imm == 1) :
 						if rs1 == 0 : pc = pc + rs2;
 					else :
 						if rs1 == 0 : pc = rs2 - 2
-		elif opc == 11 :
+		elif opc == 13 :
 					if (imm == 1) :
 						if rs1 != 0 : pc = pc + rs2;
 					else :
 						if rs1 != 0 : pc = rs2 - 2
 		else :			print ("[error (invalid computation / branch instruction)]")
-	elif (imm == 0 and op2 == 1) :
-		if opc == 0 :		context[rst] = (rs1 & 0xffff) >> 1
-		elif opc == 1 :		context[rst] = rs1 >> 1
-		else :			print ("[error (invalid shift instruction)]")
 	elif (imm == 0 and op2 == 2) :
 		if opc == 0 :
 					if (rs2 & 0x1) :
@@ -153,10 +166,10 @@ def cycle() :
 def run(program) :
 	codes = {
 		0x0000:"and", 0x1000:"or", 0x2000:"xor", 0x3000:"slt",
-		0x4000:"sltu", 0x5000:"add", 0x6000:"sub", 0x8000:"ldr",
-		0x9000:"ldc", 0x0001:"lsr", 0x1001:"asr",
-		0x0002:"ldb", 0x1002:"stb", 0x4002:"ldw", 0x5002:"stw",
-		0xa000:"bez", 0xb000:"bnz"
+		0x4000:"sltu", 0x5000:"add", 0x5001:"adc", 0x6000:"sub",
+		0x6001:"sbc", 0x8000:"ldr", 0x9000:"ldc", 0xa000:"lsr",
+		0xa001:"asr", 0xa002:"ror", 0x0002:"ldb", 0x1002:"stb",
+		0x4002:"ldw", 0x5002:"stw", 0xc000:"bez", 0xd000:"bnz"
 	}
 	cycles = 0;
 	args = sys.argv[1:]

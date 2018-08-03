@@ -4,12 +4,12 @@ import sys, string
 
 context = [
 	0x00000000, 0x00000000, 0x00000000, 0x00000000,		# r0 - r3
-	0x00000000, 0x00000000, 0x00000000, 0x00000000,		# r4 - r7
+	0x00000000, 0x00000000, 0x00000000, 0x000ffffc,		# r4 - r7
 	0x00000000, 0x00000000					# pc, stack limit
 ]
 
+carry = 0
 memory = []
-
 terminput = []
 
 def tohex(n):
@@ -45,6 +45,7 @@ def load(program) :
 	print ("[memory size: %d]" % (len(memory) * 2))
 
 def cycle() :
+	global carry
 	global terminput
 	pc = context[8]
 	# fetch an instruction from memory
@@ -74,7 +75,13 @@ def cycle() :
 		if immediate > 0x7f : immediate -= 0x100
 		rs2 = immediate
 
-	if ((imm == 0 and (op2 == 0 or op2 == 3)) or imm == 1) :
+	if (opc == 10) :
+		if op2 == 0 :		context[rst] = (rs1 & 0xffffffff) >> 1
+		elif op2 == 1 :		context[rst] = rs1 >> 1
+		elif op2 == 2 :		context[rst] = (carry << 31) & ((rs1 & 0xffffffff) >> 1)
+		else :			print ("[error (invalid shift instruction)]")
+		carry = rs1 & 1
+	elif ((imm == 0 and (op2 == 0 or op2 == 1)) or imm == 1) :
 		if opc == 0 :		
 					if (imm == 1) : rs2 &= 0xff
 					context[rst] = rs1 & rs2
@@ -88,25 +95,31 @@ def cycle() :
 		elif opc == 4 :
 					if (rs1 & 0xffffffff) < (rs2 & 0xffffffff) : context[rst] = 1
 					else : context[rst] = 0
-		elif opc == 5 :		context[rst] = (rs1 & 0xffffffff) + (rs2 & 0xffffffff)
-		elif opc == 6 :		context[rst] = (rs1 & 0xffffffff) - (rs2 & 0xffffffff)
+		elif opc == 5 :
+					if (imm == 0 and op2 == 1) :
+						context[rst] = (rs1 & 0xffffffff) + (rs2 & 0xffffffff) + carry
+					else :
+						context[rst] = (rs1 & 0xffffffff) + (rs2 & 0xffffffff)
+					carry = (context[rst] & 0x100000000) >> 32
+		elif opc == 6 :
+					if (imm == 0 and op2 == 1) :
+						context[rst] = (rs1 & 0xffffffff) - (rs2 & 0xffffffff) - carry
+					else :
+						context[rst] = (rs1 & 0xffffffff) - (rs2 & 0xffffffff)
+					carry = (context[rst] & 0x100000000) >> 32
 		elif opc == 8 :		context[rst] = rs2
 		elif opc == 9 :		context[rst] = (context[rst] << 8) | (rs2 & 0xff)
-		elif opc == 10 :
+		elif opc == 12 :
 					if (imm == 1) :
 						if rs1 == 0 : pc = pc + rs2;
 					else :
 						if rs1 == 0 : pc = rs2 - 2
-		elif opc == 11 :
+		elif opc == 13 :
 					if (imm == 1) :
 						if rs1 != 0 : pc = pc + rs2;
 					else :
 						if rs1 != 0 : pc = rs2 - 2
 		else :			print ("[error (invalid computation / branch instruction)]")
-	elif (imm == 0 and op2 == 1) :
-		if opc == 0 :		context[rst] = (rs1 & 0xffffffff) >> 1
-		elif opc == 1 :		context[rst] = rs1 >> 1
-		else :			print ("[error (invalid shift instruction)]")
 	elif (imm == 0 and op2 == 2) :
 		if opc == 0 :
 					if (rs2 & 0x1) :

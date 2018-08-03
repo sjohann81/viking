@@ -4,11 +4,11 @@ import sys, string
 
 codes = {
 	"and":0x0000, "or":0x1000, "xor":0x2000, "slt":0x3000,
-	"sltu":0x4000, "add":0x5000, "sub":0x6000, "ldr":0x8000,
-	"ldc":0x9000, "lsr":0x0001, "asr": 0x1001,
-	"ldb":0x0002, "stb":0x1002, "ldw":0x4002, "stw":0x5002,
-	"bez":0xa000, "bnz":0xb000,
-	"ldc0":0x9000, "ldc1":0x9000, "hcf":0x0003				# special ops
+	"sltu":0x4000, "add":0x5000, "adc":0x5001, "sub":0x6000,
+	"sbc":0x6001, "ldr":0x8000, "ldc":0x9000, "lsr":0xa000,
+	"asr": 0xa001, "ror": 0xa002, "ldb":0x0002, "stb":0x1002,
+	"ldw":0x4002, "stw":0x5002, "bez":0xc000, "bnz":0xd000,
+	"hcf":0x0003, "ldc0":0x9000, "ldc1":0x9000
 }
 
 lookup = {
@@ -59,8 +59,12 @@ def pass1(program) :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "asr" :
 					program[i] = "\tasr	" + parts[0] + "," + parts[1] + "," + "r0\n"
+				if flds[0] == "ror" :
+					program[i] = "\tror	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "lsl" :
 					program[i] = "\tadd	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
+				if flds[0] == "rol" :
+					program[i] = "\tadc	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "ldi" :
 					if is_number(parts[1]) :
 						if ((int(parts[1]) < 256) and (int(parts[1]) >= -128)) :

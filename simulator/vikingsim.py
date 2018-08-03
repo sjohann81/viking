@@ -11,11 +11,11 @@ from tkSimpleDialog import *
 #
 codes = {
 	"and":0x0000, "or":0x1000, "xor":0x2000, "slt":0x3000,
-	"sltu":0x4000, "add":0x5000, "sub":0x6000, "ldr":0x8000,
-	"ldc":0x9000, "lsr":0x0001, "asr": 0x1001,
-	"ldb":0x0002, "stb":0x1002, "ldw":0x4002, "stw":0x5002,
-	"bez":0xa000, "bnz":0xb000,
-	"ldc0":0x9000, "ldc1":0x9000, "hcf":0x0003				# special ops
+	"sltu":0x4000, "add":0x5000, "adc":0x5001, "sub":0x6000,
+	"sbc":0x6001, "ldr":0x8000, "ldc":0x9000, "lsr":0xa000,
+	"asr": 0xa001, "ror": 0xa002, "ldb":0x0002, "stb":0x1002,
+	"ldw":0x4002, "stw":0x5002, "bez":0xc000, "bnz":0xd000,
+	"hcf":0x0003, "ldc0":0x9000, "ldc1":0x9000
 }
 
 lookup = {
@@ -66,8 +66,12 @@ def pass1(program) :
 					program[i] = "\tlsr	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "asr" :
 					program[i] = "\tasr	" + parts[0] + "," + parts[1] + "," + "r0\n"
+				if flds[0] == "ror" :
+					program[i] = "\tror	" + parts[0] + "," + parts[1] + "," + "r0\n"
 				if flds[0] == "lsl" :
 					program[i] = "\tadd	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
+				if flds[0] == "rol" :
+					program[i] = "\tadc	" + parts[0] + "," + parts[1] + "," + parts[1] + "\n"
 				if flds[0] == "ldi" :
 					if is_number(parts[1]) :
 						if ((int(parts[1]) < 256) and (int(parts[1]) >= -128)) :
@@ -259,10 +263,10 @@ def load(program) :
 	global memory
 	codes = {
 		0x0000:"and", 0x1000:"or", 0x2000:"xor", 0x3000:"slt",
-		0x4000:"sltu", 0x5000:"add", 0x6000:"sub", 0x8000:"ldr",
-		0x9000:"ldc", 0x0001:"lsr", 0x1001:"asr",
-		0x0002:"ldb", 0x1002:"stb", 0x4002:"ldw", 0x5002:"stw",
-		0xa000:"bez", 0xb000:"bnz", 0x0003:"hcf"
+		0x4000:"sltu", 0x5000:"add", 0x5001:"adc", 0x6000:"sub",
+		0x6001:"sbc", 0x8000:"ldr", 0x9000:"ldc", 0xa000:"lsr",
+		0xa001:"asr", 0xa002:"ror", 0x0002:"ldb", 0x1002:"stb",
+		0x4002:"ldw", 0x5002:"stw", 0xc000:"bez", 0xd000:"bnz"
 	}
 	memory = []
 
@@ -301,10 +305,10 @@ def loaderror(program) :
 	global memory
 	codes = {
 		0x0000:"and", 0x1000:"or", 0x2000:"xor", 0x3000:"slt",
-		0x4000:"sltu", 0x5000:"add", 0x6000:"sub", 0x8000:"ldr",
-		0x9000:"ldc", 0x0001:"lsr", 0x1001:"asr",
-		0x0002:"ldb", 0x1002:"stb", 0x4002:"ldw", 0x5002:"stw",
-		0xa000:"bez", 0xb000:"bnz", 0x0003:"hcf"
+		0x4000:"sltu", 0x5000:"add", 0x5001:"adc", 0x6000:"sub",
+		0x6001:"sbc", 0x8000:"ldr", 0x9000:"ldc", 0xa000:"lsr",
+		0xa001:"asr", 0xa002:"ror", 0x0002:"ldb", 0x1002:"stb",
+		0x4002:"ldw", 0x5002:"stw", 0xc000:"bez", 0xd000:"bnz"
 	}
 	memory = []
 
@@ -365,6 +369,7 @@ context = [
 	0x0000, 0x0000, 0x0000			# pc, stack limit, breakpoint
 ]
 
+carry = 0
 memory = []
 terminput = []
 
@@ -377,7 +382,7 @@ machine = STOPPED
 reg_names = ['r0 (at) : ', 'r1      : ', 'r2      : ', 'r3      : ', 'r4      : ', 'r5 (sr) : ', 'r6 (lr) : ', 'r7 (sp) : ', '\nPC      : ']
 
 def cycle() :
-	global cycles, terminput
+	global carry, cycles, terminput
 	pc = context[8]
 	# fetch an instruction from memory
 	instruction = memory[pc >> 1]
@@ -406,11 +411,19 @@ def cycle() :
 		if immediate > 0x7f : immediate -= 0x100
 		rs2 = immediate
 
-	if ((imm == 0 and (op2 == 0 or op2 == 3)) or imm == 1) :
-		if opc == 0 :
+	if (opc == 10) :
+		if op2 == 0 :		context[rst] = (rs1 & 0xffff) >> 1
+		elif op2 == 1 :		context[rst] = rs1 >> 1
+		elif op2 ==  2 :	context[rst] = (carry << 15) & ((rs1 & 0xffff) >> 1)
+		else :
+					out.insert(END, ("\nInvalid shift instruction at %04x.\n" % context[8]))
+					out.see(END)
+		carry = rs1 & 1
+	elif ((imm == 0 and (op2 == 0 or op2 == 1)) or imm == 1) :
+		if opc == 0 :		
 					if (imm == 1) : rs2 &= 0xff
 					context[rst] = rs1 & rs2
-		elif opc == 1 :
+		elif opc == 1 :		
 					if (imm == 1) : rs2 &= 0xff
 					context[rst] = rs1 | rs2
 		elif opc == 2 :		context[rst] = rs1 ^ rs2
@@ -420,28 +433,32 @@ def cycle() :
 		elif opc == 4 :
 					if (rs1 & 0xffff) < (rs2 & 0xffff) : context[rst] = 1
 					else : context[rst] = 0
-		elif opc == 5 :		context[rst] = (rs1 & 0xffff) + (rs2 & 0xffff)
-		elif opc == 6 :		context[rst] = (rs1 & 0xffff) - (rs2 & 0xffff)
+		elif opc == 5 :
+					if (imm == 0 and op2 == 1) :
+						context[rst] = (rs1 & 0xffff) + (rs2 & 0xffff) + carry;
+					else :
+						context[rst] = (rs1 & 0xffff) + (rs2 & 0xffff)
+					carry = (context[rst] & 0x10000) >> 16
+		elif opc == 6 :
+					if (imm == 0 and op2 == 1) :
+						context[rst] = (rs1 & 0xffff) - (rs2 & 0xffff) - carry;
+					else :
+						context[rst] = (rs1 & 0xffff) - (rs2 & 0xffff)
+					carry = (context[rst] & 0x10000) >> 16
 		elif opc == 8 :		context[rst] = rs2
 		elif opc == 9 :		context[rst] = (context[rst] << 8) | (rs2 & 0xff)
-		elif opc == 10 :
+		elif opc == 12 :
 					if (imm == 1) :
 						if rs1 == 0 : pc = pc + rs2;
 					else :
 						if rs1 == 0 : pc = rs2 - 2
-		elif opc == 11 :
+		elif opc == 13 :
 					if (imm == 1) :
 						if rs1 != 0 : pc = pc + rs2;
 					else :
 						if rs1 != 0 : pc = rs2 - 2
 		else :
 					out.insert(END, ("\nInvalid computation / branch instruction at %04x.\n" % context[8]))
-					out.see(END)
-	elif (imm == 0 and op2 == 1) :
-		if opc == 0 :		context[rst] = (rs1 & 0xffff) >> 1
-		elif opc == 1 :		context[rst] = rs1 >> 1
-		else :
-					out.insert(END, ("\nInvalid shift instruction at %04x.\n" % context[8]))
 					out.see(END)
 	elif (imm == 0 and op2 == 2) :
 		if opc == 0 :

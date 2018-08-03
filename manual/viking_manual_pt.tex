@@ -59,7 +59,7 @@
 \begin{document}
 
 \pagestyle{empty}
-\title{\textbf{Viking CPU - Manual de referência v0.4}}
+\title{\textbf{Viking CPU - Manual de referência v0.5}}
 \author{Sérgio Johann Filho}
 
 \maketitle
@@ -85,13 +85,13 @@
 \thispagestyle{empty}
 
 \chapter{A arquitetura Viking}
-Viking é uma arquitetura simples, construída de acordo com a filosofia RISC. Essa arquitetura foi planejada com o objetivo de servir como ponto de partida para um conjunto de instruções básico extensível, em que uma quantidade reduzida de \textit{hardware} é necessário para implementar seu conjunto de operações\footnote{O conjunto de instruções foi definido com o intuito de minimizar a complexidade da arquitetura e de forma que possa facilmente sintetizar operações mais complexas através de poucas operações básicas.}, e ainda possuir funcionalidade suficiente para a execução de \textit{software} de alto nível. Por exemplo, o banco de registradores possui poucas entradas, poucos multiplexadores são necessários, não existem qualificadores de estado de operações, unidades multiplicação e divisão não foram definidas, tampouco uma unidade de deslocamento (\textit{barrel shifter}). Esse processador pode ser implementado em variantes de 16 e 32 bits, sendo que a diferença entre as duas se dá apenas com relação ao tamanho dos registradores do seu banco, o que não altera o conjunto de instruções básico.
+Viking é uma arquitetura simples, construída de acordo com a filosofia RISC. Essa arquitetura foi planejada com o objetivo de servir como ponto de partida para um conjunto de instruções básico extensível, em que uma quantidade reduzida de \textit{hardware} é necessário para implementar seu conjunto de operações\footnote{O conjunto de instruções foi definido com o intuito de minimizar a complexidade da arquitetura e de forma que possa facilmente sintetizar operações mais complexas através de poucas operações básicas.}, e ainda possuir funcionalidade suficiente para a execução de \textit{software} de alto nível. Por exemplo, o banco de registradores possui poucas entradas, poucos multiplexadores são necessários, não existem qualificadores de estado\footnote{A arquitetura possui uma excessão, que é a geração e inclusão condicional de \textit{carry} para operações aritméticas e de deslocamento.} de operações, unidades multiplicação e divisão não foram definidas, tampouco uma unidade de deslocamento (\textit{barrel shifter}). Esse processador pode ser implementado em variantes de 16 e 32 bits, sendo que a diferença entre as duas se dá apenas com relação ao tamanho dos registradores do seu banco, o que não altera o conjunto de instruções básico.
 
-Um pequeno número de operações é definido no conjunto de instruções da arquitetura Viking (17 operações básicas). Apesar do pequeno número de instruções, estas são poderosas o suficiente para realizarem todas as operações de máquinas com um maior número de instruções. Para que isso seja possível, muitas vezes uma instrução é utilizada de modo pouco ortodoxo ou uma combinação de instruções implementam um único comportamento. As operações são separadas em quatro classes distintas:
+Um pequeno número de operações é definido no conjunto de instruções da arquitetura Viking (20 operações básicas). Apesar do pequeno número de instruções, estas são poderosas o suficiente para realizarem todas as operações de máquinas com um maior número de instruções. Para que isso seja possível, muitas vezes uma instrução é utilizada de modo pouco ortodoxo ou uma combinação de instruções implementam um único comportamento. As operações são separadas em quatro classes distintas:
 
 \begin{enumerate}
-\item \textit{Computação} (AND, OR, XOR, SLT, SLTU, ADD, SUB, LDR, LDC)
-\item \textit{Deslocamento} (LSR, ASR)
+\item \textit{Computação} (AND, OR, XOR, SLT, SLTU, ADD, ADC, SUB, SBC, LDR, LDC)
+\item \textit{Deslocamento e rotação} (LSR, ASR, ROR)
 \item \textit{Carga e armazenamento} (LDB, STB, LDW, STW)
 \item \textit{Desvios condicionais} (BEZ, BNZ)
 \end{enumerate}
@@ -403,6 +403,23 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
 \end{table}
 \end{itemize}
 
+\subsubsection{ADC - add with carry}
+Soma dois valores e armazena o resultado em um registrador. A soma inclui o \textit{carry} gerado pela última instrução.
+
+\begin{itemize}
+\item ADC Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] + GPR[RsB] + Carry}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 0 1} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 1} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
 \subsubsection{SUB - subtract}
 Subtrai dois valores e armazena o resultado em um registrador. No tipo I, o segundo valor possui extensão de sinal.
 
@@ -432,6 +449,23 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
 \end{table}
 \end{itemize}
 
+\subsubsection{SBC - subtract with carry}
+Subtrai dois valores e armazena o resultado em um registrador. A subtração inclui o \textit{carry} gerado pela última instrução.
+
+\begin{itemize}
+\item SBC Rst, RsA, RsB
+\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] - GPR[RsB] - Carry}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{0 1 1 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{r r r} & \texttt{0 1} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
 \subsubsection{LDR - load register}
 Carrega uma constante de 8 bits em um registrador. O valor carregado possui extensão de sinal, o que facilita a carga de constantes de pequeno valor ($\pm$128, em complemento de dois) com apenas uma instrução.
 
@@ -450,11 +484,11 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
 \end{itemize}
 
 \subsubsection{LDC - load constant}
-Carrega uma constante em um registrador. O valor carregado não possui extensão de sinal. Antes de carregar o valor nos 8 bits menos significativos de um registrador, o mesmo tem seu conteúdo deslocado à esquerda, o que permite a carga de constantes de valores maiores que $\pm$128 com múltiplas instruções.
+Carrega uma constante em um registrador. O valor carregado não possui extensão de sinal. Antes de carregar o valor nos 8 bits menos significativos de um registrador, o mesmo tem seu conteúdo deslocado à esquerda por 8 bits, o que permite a carga de constantes de valores maiores que $\pm$128 com múltiplas instruções.
 
 \begin{itemize}
 \item LDC Rst, Immediate
-\subitem \texttt{GPR[Rst] $\leftarrow$ (GPR[Rst] $<<$ 8) + ZEXT(Immediate)}
+\subitem \texttt{GPR[Rst] $\leftarrow$ $GPR[Rst]_{<7/24:0>}$ \& ZEXT(Immediate)}
 \begin{table}[ht!]
 \centering
 \begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{5.65cm}|}
@@ -466,37 +500,54 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
 \end{table}
 \end{itemize}
 
-\subsection{Deslocamento}
+\subsection{Deslocamento e rotação}
 \subsubsection{LSR - logical shift right}
-Realiza a o deslocamento lógico por 1 bit à direita e armazena o resultado em um registrador.
+Realiza a o deslocamento lógico por 1 bit à direita e armazena o resultado em um registrador. O valor de \textit{carry} é modificado com o valor do \textit{bit} perdido.
 
 \begin{itemize}
 \item LSR Rst, RsA, r0
-\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] $>>$ 1}
+\subitem \texttt{GPR[Rst] $\leftarrow$ '0' \& $GPR[RsA]_{<15/31:1>}$}
 \begin{table}[ht!]
 \centering
 \begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
 \hline
 $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
 \textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
-\texttt{0 0 0 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{0 1} \\ \hline
+\texttt{1 0 1 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{0 0} \\ \hline
 \end{tabular}
 \end{table}
 \end{itemize}
 
 \subsubsection{ASR - arithmetic shift right}
-Realiza a o deslocamento aritmético por 1 bit à direita e armazena o resultado em um registrador. O valor armazenado tem seu sinal mantido.
+Realiza a o deslocamento aritmético por 1 bit à direita e armazena o resultado em um registrador. O valor armazenado tem seu sinal mantido. O valor de \textit{carry} é modificado com o valor do \textit{bit} perdido.
 
 \begin{itemize}
 \item ASR Rst, RsA, r0
-\subitem \texttt{GPR[Rst] $\leftarrow$ GPR[RsA] $>>$ 1}
+\subitem \texttt{GPR[Rst] $\leftarrow$ $GPR[RsA]_{15/31}$ \& $GPR[RsA]_{<15/31:1>}$}
 \begin{table}[ht!]
 \centering
 \begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
 \hline
 $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
 \textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
-\texttt{0 0 0 1} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{0 1} \\ \hline
+\texttt{1 0 1 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{0 1} \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\subsubsection{ROR - rotate right trough carry}
+Realiza a rotação por 1 bit à direita e armazena o resultado em um registrador. O valor inserido no bit mais significativo é o valor de \textit{carry} gerado na última instrução. O novo valor de \textit{carry} é modificado com o valor do \textit{bit} perdido.
+
+\begin{itemize}
+\item ROR Rst, RsA, r0
+\subitem \texttt{GPR[Rst] $\leftarrow$ Carry \& $GPR[RsA]_{<15/31:1>}$}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+$I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
+\textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
+\texttt{1 0 1 0} & \texttt{0} & \texttt{r r r} & \texttt{r r r} & \texttt{0 0 0} & \texttt{1 0} \\ \hline
 \end{tabular}
 \end{table}
 \end{itemize}
@@ -583,7 +634,7 @@ Realiza um desvio condicional, caso o valor de Fonte 1 seja zero. O endereço é
 \hline
 $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
 \textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
-\texttt{1 0 1 0} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 1} \\ \hline
+\texttt{1 1 0 0} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 1} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -595,7 +646,7 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0
 \hline
 $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
 \textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
-\texttt{1 0 1 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\texttt{1 1 0 0} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
 \end{tabular}
 \end{table}
 \end{itemize}
@@ -612,7 +663,7 @@ Realiza um desvio condicional, caso o valor de Fonte 1 não seja zero. O endere�
 \hline
 $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0>}$ \\ \hline
 \textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{RsA} & \textit{RsB} & \textit{Op2} \\ \hline
-\texttt{1 0 1 1} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 1} \\ \hline
+\texttt{1 1 0 1} & \texttt{0} & \texttt{0 0 0} & \texttt{r r r} & \texttt{r r r} & \texttt{1 1} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -624,37 +675,70 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0
 \hline
 $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:0>}$ \\ \hline
 \textit{Opcode} & \textit{Imm} & \textit{Rst} & \textit{Immediate} \\ \hline
-\texttt{1 0 1 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
+\texttt{1 1 0 1} & \texttt{1} & \texttt{r r r} & \texttt{i i i i i i i i} \\ \hline
 \end{tabular}
 \end{table}
 \end{itemize}
 
-A tabela a seguir apresenta um resumo das operações definidas na arquitetura. Importante observar que diversos \textit{opcodes} não foram definidos, o que permite adição de novas instruções ao conjunto básico.
+A tabela a seguir apresenta um resumo das operações definidas na arquitetura. Importante observar que diversos \textit{opcodes} não foram definidos, o que permite adição de novas instruções ao conjunto básico. Além disso, alguns opcodes são reaproveitados para instruções semelhantes, como instruções que fazem ou não o uso do qualificador \textit{carry}.
 
 \begin{table}[ht!]
 \centering
-\begin{tabular}{|p{2.0cm}|p{5.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\begin{tabular}{|p{2.5cm}|p{5.6cm}|p{1.6cm}|p{1.1cm}|p{1.6cm}|}
 \hline
-\bf{Instrução} 				& \bf{Descrição} & \bf{Opcode} & \bf{Imm} & \bf{Op2} \\ \hline \hline
-AND & Logical product 			& \texttt{0 0 0 0} & \texttt{x} & \texttt{0 0} \\ \hline
-OR & Logical sum 			& \texttt{0 0 0 1} & \texttt{x} & \texttt{0 0} \\ \hline
-XOR & Logical difference 		& \texttt{0 0 1 0} & \texttt{x} & \texttt{0 0} \\ \hline
-SLT & Set if less than 			& \texttt{0 0 1 1} & \texttt{x} & \texttt{0 0} \\ \hline
-SLTU & Set if less than (unsigned) 	& \texttt{0 1 0 0} & \texttt{x} & \texttt{0 0} \\ \hline
-ADD & Add 				& \texttt{0 1 0 1} & \texttt{x} & \texttt{0 0} \\ \hline
-SUB & Subtract 				& \texttt{0 1 1 0} & \texttt{x} & \texttt{0 0} \\ \hline
-LDR & Load register 			& \texttt{1 0 0 0} & \texttt{1} & \texttt{0 0} \\ \hline
-LDC & Load constant 			& \texttt{1 0 0 1} & \texttt{1} & \texttt{0 0} \\ \hline
-LSR & Logical shift right 		& \texttt{0 0 0 0} & \texttt{0} & \texttt{0 1} \\ \hline
-ASR & Arithmetic shift right 		& \texttt{0 0 0 1} & \texttt{0} & \texttt{0 1} \\ \hline
-LDB & Load byte 			& \texttt{0 0 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
-STB & Store byte 			& \texttt{0 0 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
-LDW & Load word 			& \texttt{0 1 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
-STW & Store word 			& \texttt{0 1 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
-BEZ & Branch if equal zero 		& \texttt{1 0 1 0} & \texttt{x} & \texttt{1 1} \\ \hline
-BNZ & Branch if not equal zero 		& \texttt{1 0 1 1} & \texttt{x} & \texttt{1 1} \\ \hline
+\bf{Instrução} 					& \bf{Descrição} & \bf{Opcode} & \bf{Imm} & \bf{Op2} \\ \hline \hline
+AND & Logical product 				& \texttt{0 0 0 0} & \texttt{x} & \texttt{x x} \\ \hline
+OR & Logical sum 				& \texttt{0 0 0 1} & \texttt{x} & \texttt{x x} \\ \hline
+XOR & Logical difference 			& \texttt{0 0 1 0} & \texttt{x} & \texttt{x x} \\ \hline
+SLT & Set if less than 				& \texttt{0 0 1 1} & \texttt{x} & \texttt{x x} \\ \hline
+SLTU & Set if less than (unsigned) 		& \texttt{0 1 0 0} & \texttt{x} & \texttt{x x} \\ \hline
+ADD & Add 					& \texttt{0 1 0 1} & \texttt{x} & \texttt{x x} \\ \hline
+ADC & Add with carry				& \texttt{0 1 0 1} & \texttt{0} & \texttt{0 1} \\ \hline
+SUB & Subtract 					& \texttt{0 1 1 0} & \texttt{x} & \texttt{x x} \\ \hline
+SBC & Subtract with carry			& \texttt{0 1 1 0} & \texttt{0} & \texttt{0 1} \\ \hline
+LDR & Load register 				& \texttt{1 0 0 0} & \texttt{1} & \texttt{x x} \\ \hline
+LDC & Load constant 				& \texttt{1 0 0 1} & \texttt{1} & \texttt{x x} \\ \hline
+LSR & Logical shift right			& \texttt{1 0 1 0} & \texttt{0} & \texttt{0 0} \\ \hline
+ASR & Arithmetic shift right			& \texttt{1 0 1 0} & \texttt{0} & \texttt{0 1} \\ \hline
+ROR & Rotate right trough carry			& \texttt{1 0 1 0} & \texttt{0} & \texttt{1 0} \\ \hline
+LDB & Load byte 				& \texttt{0 0 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
+STB & Store byte 				& \texttt{0 0 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
+LDW & Load word 				& \texttt{0 1 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
+STW & Store word 				& \texttt{0 1 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
+BEZ & Branch if equal zero 			& \texttt{1 1 0 0} & \texttt{x} & \texttt{x x} \\ \hline
+BNZ & Branch if not equal zero 			& \texttt{1 1 0 1} & \texttt{x} & \texttt{x x} \\ \hline
 \end{tabular}
 \end{table}
+
+\section{Detalhes sobre a codificação de instruções}
+
+As decisões abaixo foram tomadas durante o projeto do conjunto de instruções, com o principal objetivo de simplificar o projeto de hardware (incluindo a decodificação de instruções) e permitir a implementação de software eficiente. Em particular, o uso do qualificador \textit{carry} simplifica operações aritméticas e comparações que compreendem múltiplas palavras.
+
+\begin{enumerate}
+\item {As instruções mais comuns possuem tipos I e R, expandindo a funcionalidade do conjunto de instruções;
+	\begin{itemize}
+	\item AND, OR, XOR, SLT, SLTU, ADD, SUB, BEZ, BNZ - tipo R
+	\item ANDI, ORI, XORI, SLTI, SLTUI, ADDI, SUBI, BEZI, BNZI - tipo I\footnote{A nomenclatura apresentada para essas instruções não existe no processador Viking, sendo seu tipo definido pelo formato da instrução. No entanto, o comportamento dessas instruções é semelhante a casos encontrados em outros processadores, como MIPS por exemplo.}
+	\end{itemize}
+}
+\item {Algumas instruções possuem apenas um único modo de endereçamento;
+	\begin{itemize}
+	\item ADC, SBC, LSR, ASR, ROR, LDB, STB, LDW, STW - modo registrador
+	\item LDR, LDC - modo imediato
+	\end{itemize}
+}
+\item {Algumas instruções compartilham o mesmo \textit{Opcode}. Nesses casos, a desambiguação ocorre pelos campos \textit{Imm = } 0 e \textit{Op2 = } 00 para instruções mais comuns ou 01 para operações de computação com \textit{carry};
+	\begin{itemize}
+	\item ADD, ADDI, ADC - 0101
+	\item SUB, SUBI, SBC - 0110
+	\end{itemize}
+}
+\item Operações de deslocamento e rotação (LSR, ASR e ROR) são um caso especial, e compartilham o mesmo \textit{opcode}. A desambiguação é feita pelos campos \textit{Imm = } 0 e \textit{Op2} de acordo com a instrução;
+\item Todas as operações de carga e armazenamento utilizam os campos \textit{Imm = } 0 e \textit{Op2 = }10. Quatro \textit{Opcodes} são reciclados;
+\item Desvios são codificados com \textit{Opcode >=} 1100;
+\item \textit{Opcodes} 0111, 1011, 1110 e 1111 estão disponíveis;
+\item \textit{Opcodes} onde \textit{Imm = }0 e \textit{Op2 = } 11 estão disponíveis.
+\end{enumerate}
 
 \section{Características únicas}
 \subsection{Carga de constantes}
@@ -713,10 +797,64 @@ Para que valores imediados (instruções do tipo I) possam ser utilizados para a
 \subsection{Desvios condicionais}
 São definidas duas instruções de desvios condicionais (BEZ e BNZ) na arquitetura, que comparam o valor de um registrador com zero e realizam desvios condicionalmente. O motivo para a definição dessas instruções, e não instruções mais genéricas que comparam o valor de um registrador com qualquer valor (como BEQ e BNE) é simples. No tipo de instrução R, três registradores são referenciados. Se dois valores a serem comparados estivessem em registrador, e mais um registrador de endereços fosse referenciado na mesma instrução, seriam necessárias três portas de leitura no banco de registradores. Além disso, seria necessário o uso de um multiplexador adicional para modificar a semântica dos campos \textit{Rst}, \textit{RsA} e \textit{RsB} em instruções de desvio.
 
+\subsection{Soma e subtração com \textit{carry}}
+A arquitetura define modificadores para as operações de soma (ADD) e subtração (SUB) para a inclusão de um valor de \textit{carry} gerado pela última operação aritmética. Tais operações são definidas pelas instruções ADC (\textit{Add with carry}) e SBC (\textit{Subtract with carry}), e podem ser utilizadas para simplificar o cálculo de valores de maior magnitude que o suportado pela largura natural da arquitetura. Por exemplo, supondo que deseja-se realizar uma soma em uma arquitetura de 16 bits, onde dois valores de 32 bits estão dispostos em quatro registradores (no exemplo, o primeiro operando está armazenado em \textit{r1:r0} (parte alta e baixa, respectivamente) e o segundo operando está em \textit{r3:r2}). A operação pode ser realizada da seguinte forma:
+
+\begin{verbatim}
+        add r2,r2,r0
+        adc r3,r3,r1
+\end{verbatim}
+
+Na primeira instrução, as partes baixas são somadas e o resultado é armazenado em \textit{r2}, gerando-se também o \textit{carry}. Na segunda instrução, as partes altas são somadas, juntamente com o valor do \textit{carry} da última operação e o resultado é armazenado em \textit{r3}.
+
+É importante observar que todas as instruções da arquitetura modificam o estado do qualificador \textit{carry} mas apenas as instruções de soma (ADD, ADC), subtração (SUB, SBC) e deslocamento ou rotação (LSR, ASR, ROR) fazem uso do qualificador (gerado pela última instrução) e podem definir seu valor em 1, caso ocorra \textit{carry}. Em todos os outros casos, \textit{carry} possui o valor 0 após a execução da instrução.
+
+\subsection{Deslocamento com \textit{carry}}
+
+São definidas três operações de deslocamento na arquitetura, incluindo o deslocamento lógico à direita (LSR), deslocamento aritmético à direita (ASR) e rotação à direita (ROR). Em todos os casos, o bit deslocado define o valor do qualificador \textit{carry} após a execução da instrução. A instrução de rotação utiliza o valor de \textit{carry} gerado na última instrução como o valor incluído em seu bit mais significativo, e modifica o valor de \textit{carry} com o valor do bit deslocado (perdido). A instrução de rotação (juntamente com as instruções de deslocamento) pode ser utilizada para a manipulação de valores maiores que o naturalmente suportado pela arquitetura. Por exemplo, supondo que a arquitetura seja de 16 bits e um valor de 32 bits esteja disposto em dois registradores (\textit{r2:r1}), a operação de deslocamento em 32 bits pode ser realizada da seguinte forma (essencialmente, dividindo o valor de 32 bits por 2 e mantendo o valor sinalizado):
+
+\begin{verbatim}
+        asr r2,r2
+        ror r1,r1
+\end{verbatim}
+
+As operações de deslocamento e rotação à esquerda são sintetizadas com o uso das instruções ADD e ADC, respectivamente. Seguindo o exemplo anterior, poderia-se realizar a mesma operação, porém com o deslocamento à esquerda, da seguinte forma (essencialmente, multiplicando o valor de 32 bits por 2):
+
+\begin{verbatim}
+        add r1,r1
+        adc r2,r2
+\end{verbatim}
+
+\subsection{Comparações com \textit{carry}}
+
+Operações de comparação também podem utilizar \textit{carry} com o objetivo de permitir de maneira simplificada a avaliação entre operandos maiores que a largura natural da arquitetura. Uma instrução semelhante a \textit{Set if less than (unsigned)} pode ser sintetizada pelo seguinte código (operandos de 32 bits):
+
+\begin{verbatim}
+        xor r0,r0,r0
+        sub r1,r1,r3
+        sbc r2,r2,r4
+        adc r1,r0,r0
+\end{verbatim}
+
+No exemplo apresentado, se o resultado contido nos registradores \textit{r2:r1} for menor que \textit{r4:r3} (sem sinal), o valor 1 será armazenado em \textit{r1} e 0 caso contrário. Para uma versão que envolve operandos sinalizados em complemento de 2, é necessário apenas inverter o sinal dos dois operandos (bit mais significativo) e realizar o teste como se os números não fossem sinalizados:
+
+\begin{verbatim}
+        ldr r0,0x80
+        ldc r0,0x00
+        xor r2,r2,r0
+        xor r4,r4,r0
+        xor r0,r0,r0
+        sub r1,r1,r3
+        sbc r2,r2,r4
+        adc r1,r0,r0
+\end{verbatim}
+
+Em ambos os casos não são necessários desvios\footnote{Em arquiteturas RISC, muitas vezes não existem qualificadores de operação (como o \textit{carry}), o que complica consideravelmemente a implementação de operações que envolvem precisão maior em função de desvios condicionais. O uso de desvios, além de aumentar o tamanho do código, implica em degradação da execução em função de sua influência no \textit{pipeline} de execução.} adicionais (além do desvio posterior ao teste, não mostrado nos exemplos) para a implementação das comparações em comandos de seleção e repetição.
+
 \subsection{Outras operações}
 Algumas operações elementares como complemento, deslocamentos à esquerda e outros tipos de desvios são implementados na arquitetura com o uso de pseudo operações. Em algumas operações, não existe vantagem alguma em incluir \textit{hardware} adicional para o seu suporte, uma vez que as mesmas podem ser sintetizadas diretamente por outras equivalentes. Um exemplo é o deslocamento à esquerda, que pode ser obtido somando-se um valor a ele mesmo, não sendo necessária uma instrução separada para implementar esse comportamento.
 
-Outras operações podem ser sintetizadas com sequências de poucas instruções elementares. Mais detalhes sobre tais operações são apresentadas no Capítulo \ref{ref:pseudo_ops}.
+Outras operações podem ser sintetizadas com sequências de poucas instruções elementares. Mais detalhes sobre tais operações são apresentados no Capítulo \ref{ref:pseudo_ops}.
 
 \section{Tipos de dados}
 \label{ref:data_types}
@@ -736,7 +874,7 @@ Nas tabelas de instruções são apresentados o formato da instrução (pseudo o
 
 \section{Pseudo operações básicas}
 
-Instruções de complemento são sintetizadas com operações XOR e ADD. Deslocamentos à esquerda são sintetizados com operações ADD. A carga de constantes é sintetizada de maneira trivial pelo montador, no entanto uma sequência mais otimizada pode ser gerada, como apresentado na Seção \ref{ref:constants}. O parâmetro \textit{const} da pseudo operação LDI pode ser tanto um valor numérico quanto um rótulo, tendo seu valor resolvido pelo montador.
+Instruções de complemento são sintetizadas com operações XOR e ADD. Deslocamentos e rotações à esquerda são sintetizados com operações ADD e ADC. A carga de constantes é sintetizada de maneira trivial pelo montador, no entanto uma sequência mais otimizada pode ser gerada, como apresentado na Seção \ref{ref:constants}. O parâmetro \textit{const} da pseudo operação LDI pode ser tanto um valor numérico quanto um rótulo, tendo seu valor resolvido pelo montador.
 
 Operações de carga e armazenamento e desvios podem ser especificadas com apenas dois registradores, uma vez que para essas instruções um dos registradores não é utilizado fazendo com que o formato com três registradores se torne pouco intuitivo. Os parâmetros \textit{addr} das operações BEZ e BNZ podem ser rótulos, sendo que essas operações fazem uso do registrador \textit{at} para a carga do endereço. Isso simplifica o código de montagem pois o programador não precisa carregar o endereço manualmente. Outras operações que fazem uso de rótulos são LDB, STB, LDW e STW. A operação HCF não é definida pela arquitetura, e possui funcionalidade apenas no contexto de simulação (a simulação é abortada).
 
@@ -753,7 +891,9 @@ NEG  & Two's complement			& \texttt{neg r1} & \texttt{xor r1,-1\newline add r1,1
 MOV  & Move register			& \texttt{mov r1,r2} & \texttt{and r1,r2,r2} \\ \hline
 LSR  & Logical shift right		& \texttt{lsr r1,r2} & \texttt{lsr r1,r2,r0} \\ \hline
 ASR  & Arithmetic shift right		& \texttt{asr r1,r2} & \texttt{asr r1,r2,r0} \\ \hline
+ROR  & Rotate right trough carry	& \texttt{ror r1,r2} & \texttt{ror r1,r2,r0} \\ \hline
 LSL  & Logical shift left		& \texttt{lsl r1,r2} & \texttt{add r1,r2,r2} \\ \hline
+ROL  & Rotate left trough carry		& \texttt{rol r1,r2} & \texttt{adc r1,r2,r2} \\ \hline
 LDI  & Load immediate			& \texttt{ldi r1,\textit{const}} & \texttt{ldr r1,\textit{byte0}\newline ldc r1,\textit{byte1}\newline ...} \\ \hline
 BEZ  & Branch if equal zero		& \texttt{bez r1,r2} & \texttt{bez r0,r1,r2} \\ \hline
 	& 				& \texttt{bez r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline bez r0,r1,at} \\ \hline
@@ -780,9 +920,9 @@ Nas operações de deslocamento que envolvem múltiplos bits o registrador \text
 \begin{tabular}{|p{2.0cm}|p{4.0cm}|p{3.5cm}|p{3.5cm}|}
 \hline
 \bf{Instrução} 					& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
-LSRM & Logical shift right multiple		& \texttt{lsrm r1,r2} & \texttt{lsr r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
-ASRM & Arithmetic shift right multiple		& \texttt{asrm r1,r2} & \texttt{asr r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
-LSLM & Logical shift left multiple		& \texttt{lslm r1,r2} & \texttt{add r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
+LSRM & Logical shift right multiple		& \texttt{lsrm r1,r2} & \texttt{bez r2,6\newline lsr r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
+ASRM & Arithmetic shift right multiple		& \texttt{asrm r1,r2} & \texttt{bez r2,6\newline asr r1,r1,r0\newline sub r2,1\newline bnz r2,-6} \\ \hline
+LSLM & Logical shift left multiple		& \texttt{lslm r1,r2} & \texttt{bez r2,6\newline add r1,r1,r1\newline sub r2,1\newline bnz r2,-6} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -797,9 +937,9 @@ Em pseudo operações que envolvem testes, os registradores \textit{r2} e \texti
 \hline
 \bf{Instrução} 					& \bf{Descrição} & \bf{Formato} & \bf{Equivalência} \\ \hline \hline
 SEQ  & Set if equal 				& \texttt{seq r1,r2,r3} & \texttt{sub r1,r2,r3\newline sltu r1,1} \\ \hline
-SNE  & Set if not equal				& \texttt{sne r1,r2,r3} & \texttt{sub r1,r2,r3\newline xor at,at,at\newline sltu r1,at,r1} \\ \hline
-SGE  & Set if greater equal			& \texttt{sge r1,r2,r3} & \texttt{slt r1,r2,r3\newline ldr at,1\newline sub r1,at,r1} \\ \hline
-SGEU & Set if greater equal (unsigned)		& \texttt{sgeu r1,r2,r3} & \texttt{sltu r1,r2,r3\newline ldr at,1\newline sub r1,at,r1} \\ \hline
+SNE  & Set if not equal				& \texttt{sne r1,r2,r3} & \texttt{sub r1,r2,r3\newline sltu r1,1\newline xor r1,1} \\ \hline
+SGE  & Set if greater equal			& \texttt{sge r1,r2,r3} & \texttt{slt r1,r2,r3\newline xor r1,1} \\ \hline
+SGEU & Set if greater equal (unsigned)		& \texttt{sgeu r1,r2,r3} & \texttt{sltu r1,r2,r3\newline xor r1,1} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1035,7 +1175,7 @@ Um detalhe importante para acesso à memória utilizando o conceito de ponteiros
 
 Para o cálculo do deslocamento, usa-se a fórmula $d = i * ts$, onde $d$ é o deslocamento, $i$ é o índice do vetor e $ts$ é o tamanho do tipo de dado armazenado no vetor. Sabendo-se o deslocamento, é possível encontrar o endereço de memória efetivo de um determinado elemento em um índice $i$ de um vetor. Esse elemento $i$ pode ser acessado por um ponteiro que contém o endereço do primeiro elemento do vetor somado ao deslocamento (formando um endereço efetivo).
 
-No exemplo abaixo, o quarto elemento de um vetor será acessado e nele armazenado o valor 123 (\textit{vetor[3] = 123}. Assume-se que \textit{vetor} possui o tipo inteiro e possui 5 elementos.
+No exemplo abaixo, o quarto elemento de um vetor será acessado e nele armazenado o valor 123 (\textit{vetor[3] = 123}. Assume-se que \textit{vetor} possui 5 elementos do tipo inteiro de 16 bits.
 
 \begin{verbatim}
     ldi r4,vet
