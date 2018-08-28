@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2018.1.24)  19 JUL 2018 20:02
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.9.28)  28 AUG 2018 17:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -971,6 +971,11 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 868.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 875.
+
+Underfull \hbox (badness 10000) in paragraph at lines 894--894
+[]\T1/cmr/m/n/10 Rotate right th-rough
+ []
+
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 914.
 Package babel Info: Redefining portuges shorthand "|
@@ -987,11 +992,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 924--924
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 929.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 929.
-[20]
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 929.
-Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 931.
 
 Underfull \hbox (badness 1776) in paragraph at lines 958--958
@@ -1000,7 +1000,11 @@ Underfull \hbox (badness 1776) in paragraph at lines 958--958
 
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 962.
-
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 965.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 965.
+[20]
 Underfull \hbox (badness 3343) in paragraph at lines 977--977
 []\T1/cmr/m/n/10 Branch if gre-a-ter than
  []
@@ -1008,12 +1012,13 @@ Underfull \hbox (badness 3343) in paragraph at lines 977--977
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 982.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 999.
+(babel)             in language  on input line 997.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1002.
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 1002.
+(babel)             in language  on input line 997.
 [21]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 999.
+
 Underfull \hbox (badness 10000) in paragraph at lines 1008--1008
 []\T1/cmtt/m/n/10 mul r1,r2,r3
  []
@@ -1197,7 +1202,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1411.
 Here is how much of TeX's memory you used:
  10001 strings out of 493013
  141433 string characters out of 6135682
- 492585 words of memory out of 5000000
+ 492582 words of memory out of 5000000
  12790 multiletter control sequences out of 15000+600000
  23791 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1224,7 +1229,7 @@ er/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti0800.pfb></us
 r/share/texmf/fonts/type1/public/cm-super/sfti1000.pfb></usr/share/texmf/fonts/
 type1/public/cm-super/sftt0800.pfb></usr/share/texmf/fonts/type1/public/cm-supe
 r/sftt1000.pfb>
-Output written on viking_manual_pt.pdf (42 pages, 627036 bytes).
+Output written on viking_manual_pt.pdf (42 pages, 626866 bytes).
 PDF statistics:
  1190 PDF objects out of 1200 (max. 8388607)
  1108 compressed objects within 12 object streams

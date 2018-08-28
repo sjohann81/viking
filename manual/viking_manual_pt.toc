@@ -21,7 +21,7 @@
 \contentsline {subsection}{\numberline {1.4.2}Deslocamento e rota\IeC {\c c}\IeC {\~a}o}{10}{subsection.1.4.2}
 \contentsline {subsubsection}{LSR - logical shift right}{10}{section*.12}
 \contentsline {subsubsection}{ASR - arithmetic shift right}{10}{section*.13}
-\contentsline {subsubsection}{ROR - rotate right trough carry}{11}{section*.14}
+\contentsline {subsubsection}{ROR - rotate right through carry}{11}{section*.14}
 \contentsline {subsection}{\numberline {1.4.3}Carga e armazenamento}{11}{subsection.1.4.3}
 \contentsline {subsubsection}{LDB - load byte}{11}{section*.15}
 \contentsline {subsubsection}{STB - store byte}{11}{section*.16}
@@ -43,10 +43,10 @@
 \contentsline {chapter}{\numberline {2}S\IeC {\'\i }ntese de pseudo opera\IeC {\c c}\IeC {\~o}es}{19}{chapter.2}
 \contentsline {section}{\numberline {2.1}Pseudo opera\IeC {\c c}\IeC {\~o}es b\IeC {\'a}sicas}{19}{section.2.1}
 \contentsline {section}{\numberline {2.2}Opera\IeC {\c c}\IeC {\~o}es de deslocamento}{20}{section.2.2}
-\contentsline {section}{\numberline {2.3}Pseudo opera\IeC {\c c}\IeC {\~o}es n\IeC {\~a}o suportadas pelo montador}{21}{section.2.3}
-\contentsline {subsection}{\numberline {2.3.1}Testes, sele\IeC {\c c}\IeC {\~a}o e desvios (condicionais)}{21}{subsection.2.3.1}
+\contentsline {section}{\numberline {2.3}Pseudo opera\IeC {\c c}\IeC {\~o}es n\IeC {\~a}o suportadas pelo montador}{20}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Testes, sele\IeC {\c c}\IeC {\~a}o e desvios (condicionais)}{20}{subsection.2.3.1}
 \contentsline {subsection}{\numberline {2.3.2}Opera\IeC {\c c}\IeC {\~o}es condicionais equivalentes}{21}{subsection.2.3.2}
-\contentsline {subsection}{\numberline {2.3.3}Desvios incondicionais}{21}{subsection.2.3.3}
+\contentsline {subsection}{\numberline {2.3.3}Desvios incondicionais}{22}{subsection.2.3.3}
 \contentsline {subsection}{\numberline {2.3.4}Opera\IeC {\c c}\IeC {\~o}es aritm\IeC {\'e}ticas adicionais}{22}{subsection.2.3.4}
 \contentsline {chapter}{\numberline {3}Programando com o processador Viking}{23}{chapter.3}
 \contentsline {section}{\numberline {3.1}Controle de fluxo do programa}{23}{section.3.1}

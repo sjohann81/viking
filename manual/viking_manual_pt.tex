@@ -535,7 +535,7 @@ $I_{<15:12>}$ & $I_{<11>}$ & $I_{<10:8>}$ & $I_{<7:5>}$ & $I_{<4:2>}$ & $I_{<1:0
 \end{table}
 \end{itemize}
 
-\subsubsection{ROR - rotate right trough carry}
+\subsubsection{ROR - rotate right through carry}
 Realiza a rotação por 1 bit à direita e armazena o resultado em um registrador. O valor inserido no bit mais significativo é o valor de \textit{carry} gerado na última instrução. O novo valor de \textit{carry} é modificado com o valor do \textit{bit} perdido.
 
 \begin{itemize}
@@ -700,7 +700,7 @@ LDR & Load register 				& \texttt{1 0 0 0} & \texttt{1} & \texttt{x x} \\ \hline
 LDC & Load constant 				& \texttt{1 0 0 1} & \texttt{1} & \texttt{x x} \\ \hline
 LSR & Logical shift right			& \texttt{1 0 1 0} & \texttt{0} & \texttt{0 0} \\ \hline
 ASR & Arithmetic shift right			& \texttt{1 0 1 0} & \texttt{0} & \texttt{0 1} \\ \hline
-ROR & Rotate right trough carry			& \texttt{1 0 1 0} & \texttt{0} & \texttt{1 0} \\ \hline
+ROR & Rotate right through carry			& \texttt{1 0 1 0} & \texttt{0} & \texttt{1 0} \\ \hline
 LDB & Load byte 				& \texttt{0 0 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
 STB & Store byte 				& \texttt{0 0 0 1} & \texttt{0} & \texttt{1 0} \\ \hline
 LDW & Load word 				& \texttt{0 1 0 0} & \texttt{0} & \texttt{1 0} \\ \hline
@@ -891,9 +891,9 @@ NEG  & Two's complement			& \texttt{neg r1} & \texttt{xor r1,-1\newline add r1,1
 MOV  & Move register			& \texttt{mov r1,r2} & \texttt{and r1,r2,r2} \\ \hline
 LSR  & Logical shift right		& \texttt{lsr r1,r2} & \texttt{lsr r1,r2,r0} \\ \hline
 ASR  & Arithmetic shift right		& \texttt{asr r1,r2} & \texttt{asr r1,r2,r0} \\ \hline
-ROR  & Rotate right trough carry	& \texttt{ror r1,r2} & \texttt{ror r1,r2,r0} \\ \hline
+ROR  & Rotate right through carry	& \texttt{ror r1,r2} & \texttt{ror r1,r2,r0} \\ \hline
 LSL  & Logical shift left		& \texttt{lsl r1,r2} & \texttt{add r1,r2,r2} \\ \hline
-ROL  & Rotate left trough carry		& \texttt{rol r1,r2} & \texttt{adc r1,r2,r2} \\ \hline
+ROL  & Rotate left through carry		& \texttt{rol r1,r2} & \texttt{adc r1,r2,r2} \\ \hline
 LDI  & Load immediate			& \texttt{ldi r1,\textit{const}} & \texttt{ldr r1,\textit{byte0}\newline ldc r1,\textit{byte1}\newline ...} \\ \hline
 BEZ  & Branch if equal zero		& \texttt{bez r1,r2} & \texttt{bez r0,r1,r2} \\ \hline
 	& 				& \texttt{bez r1,\textit{addr}} & \texttt{ldi at,\textit{addr}\newline bez r0,r1,at} \\ \hline
