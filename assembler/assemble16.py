@@ -99,7 +99,7 @@ def pass1(program) :
 				if flds[0] == "stw" and len(parts) == 2 :
 					if lookup.get(parts[1]) == None :
 						program[i] = "\tldc0	at," + parts[1] + "\n"
-						program.insert(i+1, "\tldc1	at," + parts[1] + "\n");
+						program.insert(i+1, "\tldc1	at," + parts[1] + "\n")
 						program.insert(i+2, "\tstw	r0," + parts[0] + ",at\n")
 					else :
 						program[i] = "\tstw	r0," + parts[0] + "," + parts[1] + "\n"

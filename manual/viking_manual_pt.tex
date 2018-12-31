@@ -797,7 +797,8 @@ Para que valores imediados (instruções do tipo I) possam ser utilizados para a
 \subsection{Desvios condicionais}
 São definidas duas instruções de desvios condicionais (BEZ e BNZ) na arquitetura, que comparam o valor de um registrador com zero e realizam desvios condicionalmente. O motivo para a definição dessas instruções, e não instruções mais genéricas que comparam o valor de um registrador com qualquer valor (como BEQ e BNE) é simples. No tipo de instrução R, três registradores são referenciados. Se dois valores a serem comparados estivessem em registrador, e mais um registrador de endereços fosse referenciado na mesma instrução, seriam necessárias três portas de leitura no banco de registradores. Além disso, seria necessário o uso de um multiplexador adicional para modificar a semântica dos campos \textit{Rst}, \textit{RsA} e \textit{RsB} em instruções de desvio.
 
-\subsection{Soma e subtração com \textit{carry}}
+%\subsection{Soma e subtração com \textit{carry}}
+\subsection{Soma e subtração de múltipla precisão}
 A arquitetura define modificadores para as operações de soma (ADD) e subtração (SUB) para a inclusão de um valor de \textit{carry} gerado pela última operação aritmética. Tais operações são definidas pelas instruções ADC (\textit{Add with carry}) e SBC (\textit{Subtract with carry}), e podem ser utilizadas para simplificar o cálculo de valores de maior magnitude que o suportado pela largura natural da arquitetura. Por exemplo, supondo que deseja-se realizar uma soma em uma arquitetura de 16 bits, onde dois valores de 32 bits estão dispostos em quatro registradores (no exemplo, o primeiro operando está armazenado em \textit{r1:r0} (parte alta e baixa, respectivamente) e o segundo operando está em \textit{r3:r2}). A operação pode ser realizada da seguinte forma:
 
 \begin{verbatim}
@@ -809,7 +810,8 @@ Na primeira instrução, as partes baixas são somadas e o resultado é armazena
 
 É importante observar que todas as instruções da arquitetura modificam o estado do qualificador \textit{carry} mas apenas as instruções de soma (ADD, ADC), subtração (SUB, SBC) e deslocamento ou rotação (LSR, ASR, ROR) fazem uso do qualificador (gerado pela última instrução) e podem definir seu valor em 1, caso ocorra \textit{carry}. Em todos os outros casos, \textit{carry} possui o valor 0 após a execução da instrução.
 
-\subsection{Deslocamento com \textit{carry}}
+%\subsection{Deslocamento com \textit{carry}}
+\subsection{Deslocamento de múltipla precisão}
 
 São definidas três operações de deslocamento na arquitetura, incluindo o deslocamento lógico à direita (LSR), deslocamento aritmético à direita (ASR) e rotação à direita (ROR). Em todos os casos, o bit deslocado define o valor do qualificador \textit{carry} após a execução da instrução. A instrução de rotação utiliza o valor de \textit{carry} gerado na última instrução como o valor incluído em seu bit mais significativo, e modifica o valor de \textit{carry} com o valor do bit deslocado (perdido). A instrução de rotação (juntamente com as instruções de deslocamento) pode ser utilizada para a manipulação de valores maiores que o naturalmente suportado pela arquitetura. Por exemplo, supondo que a arquitetura seja de 16 bits e um valor de 32 bits esteja disposto em dois registradores (\textit{r2:r1}), a operação de deslocamento em 32 bits pode ser realizada da seguinte forma (essencialmente, dividindo o valor de 32 bits por 2 e mantendo o valor sinalizado):
 
@@ -825,28 +827,39 @@ As operações de deslocamento e rotação à esquerda são sintetizadas com o u
         adc r2,r2
 \end{verbatim}
 
-\subsection{Comparações com \textit{carry}}
+%\subsection{Comparações com \textit{carry}}
+\subsection{Comparações de múltipla precisão}
 
 Operações de comparação também podem utilizar \textit{carry} com o objetivo de permitir de maneira simplificada a avaliação entre operandos maiores que a largura natural da arquitetura. Uma instrução semelhante a \textit{Set if less than (unsigned)} pode ser sintetizada pelo seguinte código (operandos de 32 bits):
 
 \begin{verbatim}
         xor r0,r0,r0
-        sub r1,r1,r3
-        sbc r2,r2,r4
+        sub r3,r3,r1
+        sbc r4,r4,r2
         adc r1,r0,r0
 \end{verbatim}
 
-No exemplo apresentado, se o resultado contido nos registradores \textit{r2:r1} for menor que \textit{r4:r3} (sem sinal), o valor 1 será armazenado em \textit{r1} e 0 caso contrário. Para uma versão que envolve operandos sinalizados em complemento de 2, é necessário apenas inverter o sinal dos dois operandos (bit mais significativo) e realizar o teste como se os números não fossem sinalizados:
+No exemplo apresentado, se o resultado contido nos registradores \textit{r4:r3} for menor que \textit{r2:r1} (sem sinal), o valor 1 será armazenado em \textit{r1} e 0 caso contrário.
+%Para uma versão que envolve operandos sinalizados em complemento de 2, é necessário apenas inverter o sinal dos dois operandos (bit mais significativo) e realizar o teste como se os números não fossem sinalizados:
+Uma versão que envolve o uso de operandos sinalizados (em complemento de 2) é apresentada abaixo:
 
+%\begin{verbatim}
+%        ldr r0,0x80
+%        ldc r0,0x00
+%        xor r2,r2,r0
+%        xor r4,r4,r0
+%        xor r0,r0,r0
+%        sub r1,r1,r3
+%        sbc r2,r2,r4
+%        adc r1,r0,r0
+%\end{verbatim}
 \begin{verbatim}
-        ldr r0,0x80
-        ldc r0,0x00
-        xor r2,r2,r0
-        xor r4,r4,r0
-        xor r0,r0,r0
-        sub r1,r1,r3
-        sbc r2,r2,r4
-        adc r1,r0,r0
+        sltu r4,r2,r4
+        sub r2,r1,r3
+        sltu r2,1
+        and r4,r4,r2
+        sltu r1,r1,r3
+        or r1,r1,r4        
 \end{verbatim}
 
 Em ambos os casos não são necessários desvios\footnote{Em arquiteturas RISC, muitas vezes não existem qualificadores de operação (como o \textit{carry}), o que complica consideravelmemente a implementação de operações que envolvem precisão maior em função de desvios condicionais. O uso de desvios, além de aumentar o tamanho do código, implica em degradação da execução em função de sua influência no \textit{pipeline} de execução.} adicionais (além do desvio posterior ao teste, não mostrado nos exemplos) para a implementação das comparações em comandos de seleção e repetição.
