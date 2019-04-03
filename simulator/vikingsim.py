@@ -624,6 +624,9 @@ def step() :
 			out.see(END)
 	else :
 		showerror("Error", "No program in memory.")
+	
+def clearConsole() :
+	out.delete(1.0, END)
 
 def refresh_regs() :
 	for i in range(9) :
@@ -703,6 +706,7 @@ machinemenu.add_command(label="Reset", command=reset)
 machinemenu.add_command(label="Stop", command=stop)
 machinemenu.add_command(label="Run", command=run)
 machinemenu.add_command(label="Step", command=step)
+machinemenu.add_command(label="Clear console", command=clearConsole)
 machinemenu.add_separator()
 machinemenu.add_command(label="Set breakpoint", command=set_breakpoint)
 machinemenu.add_command(label="Set machine cycle delay", command=set_cycledelay)
@@ -760,6 +764,7 @@ Button(middleframe, text='Reset', width=14, command=reset).pack()
 Button(middleframe, text='Stop', width=14, command=stop).pack()
 Button(middleframe, text='Run', width=14, command=run).pack()
 Button(middleframe, text='Step', width=14, command=step).pack()
+Button(middleframe, text='Clear', width=14, command=clearConsole).pack()
 
 out = Text(bottomframe, height=14, width=122, font=('Courier', 10))
 outscroll = Scrollbar(bottomframe, command=out.yview)
