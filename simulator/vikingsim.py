@@ -48,7 +48,7 @@ def pass1(program) :
 		flds = string.split(lin)
 		if flds :
 			if flds[0] == ";" :
-				program[i] = '\n'
+				program[i] = "\n"
 			if flds[0] == "nop" :
 				program[i] = "\tand	r0,r0,r0\n"
 			if flds[0] == "hcf" :
@@ -341,7 +341,7 @@ def assembler() :
 	global lookup
 	out.insert(END, "\nAssembling...")
 	out.see(END)
-	source_program = str(textasm.get('1.0', 'end'))
+	source_program = str(textasm.get('1.0', 'end').encode("utf8"))
 	textsym.delete(0, END)
 	program = source_program.splitlines()
 
@@ -521,7 +521,7 @@ def newprogram() :
 	textasm.delete('1.0', END)
 
 def openprogram() :
-	name = askopenfilename()
+	name = askopenfilename(defaultextension=".asm", filetypes=(("Assembly file", "*.asm"),("All Files", "*.*")))
 	if (name) :
 		program = open(name, "r")
 		if program :
@@ -532,7 +532,7 @@ def openprogram() :
 			program.close()
 
 def openadditionalprogram() :
-	name = askopenfilename()
+	name = askopenfilename(defaultextension=".asm", filetypes=(("Assembly file", "*.asm"),("All Files", "*.*")))
 	if (name) :
 		program = open(name, "r")
 		if program :
@@ -543,7 +543,7 @@ def openadditionalprogram() :
 			program.close()
 
 def saveprogram() :
-	name = asksaveasfilename()
+	name = asksaveasfilename(defaultextension=".asm", filetypes=(("Assembly file", "*.asm"),("All Files", "*.*")))
 	if (name) :
 		program = open(name, "w")
 		if program :
