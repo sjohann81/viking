@@ -78,7 +78,7 @@ def cycle() :
 	if (opc == 10) :
 		if op2 == 0 :		context[rst] = (rs1 & 0xffff) >> 1
 		elif op2 == 1 :		context[rst] = rs1 >> 1
-		elif op2 == 2 :	context[rst] = (carry << 15) & ((rs1 & 0xffff) >> 1)
+		elif op2 == 2 :	context[rst] = (carry << 15) | ((rs1 & 0xffff) >> 1)
 		else :			print ("[error (invalid shift instruction)]")
 		carry = rs1 & 1
 	elif ((imm == 0 and (op2 == 0 or op2 == 1)) or imm == 1) :
